@@ -1,27 +1,32 @@
-import { Card, CardAction, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
 import { cn } from "../../shared/lib/utils";
 
 export default function ICard({
    children,
+   logo, 
    title,
    description,
-   cardAction,
    cardClassName = "",
    cardContentClassName = "",
    cardTitleClassName = "",
    cardHeaderClassName = "",
-   onClick,
 }) {
    return (
-      <Card className={`w-full !max-w-2xl border-outline ${cardClassName}`} onClick={onClick}>
-         {title && (
-            <CardHeader className={cn('gap-1', cardHeaderClassName)}>
-               <CardTitle className={cn("text-2xl font-bold", cardTitleClassName)}>{title}</CardTitle>
-               <CardDescription>{description}</CardDescription>
-               <CardAction>{cardAction}</CardAction>
+      <Card className={cn("w-full !max-w-md border-none shadow-2xl", cardClassName)}>
+         {(title || logo) && (
+            <CardHeader className={cn('gap-1 items-center pb-2', cardHeaderClassName)}>
+               {logo && <div>{logo}</div>}
+               {title && (
+                  <CardTitle className={cn("text-2xl font-bold tracking-tight", cardTitleClassName)}>
+                     {title}
+                  </CardTitle>
+               )}
+               {description && <CardDescription>{description}</CardDescription>}
             </CardHeader>
          )}
-         <CardContent className={cardContentClassName}>{children}</CardContent>
+         <CardContent className={cn("pt-4", cardContentClassName)}>
+            {children}
+         </CardContent>
       </Card>
    );
 }

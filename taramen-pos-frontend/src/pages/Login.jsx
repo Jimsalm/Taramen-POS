@@ -8,7 +8,7 @@ import Form from "../components/custom/Form";
 import IInput from "../components/custom/Input";
 import LoginLayout from "../layout/LoginLayout";
 import { loginSchema } from "../shared/lib/zod/schema/login";
-import { LockIcon, MailIcon } from "lucide-react";
+import { LockIcon, MailIcon, UtensilsCrossed } from "lucide-react"; 
 
 export default function Login() {
    const [error, setError] = useState(null);
@@ -37,14 +37,20 @@ export default function Login() {
       }
    };
 
-
    return (
       <LoginLayout>
          <section className='flex flex-col lg:flex-row items-start mx-auto lg:gap-12 lg:pr-24 mb-12 lg:mb-0'>
             <ICard
+               logo={
+                  <img 
+                     src="/TARAMEN.jpg" 
+                     alt="Ta'ramen POS"
+                     className="size-60 w-auto mx-auto block"
+                  />
+               }
                title='Welcome Back!'
                description='Enter your credentials to access your account'
-               cardClassName='text-center w-100 bg-white'
+               cardClassName='text-center w-100 bg-white shadow-xl'
                cardTitleClassName='lg:text-3xl'
             >
                <Form className='flex flex-col gap-6' onSubmit={onSubmit} schema={loginSchema}>
