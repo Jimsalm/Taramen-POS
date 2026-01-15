@@ -19,7 +19,7 @@ class UserSeeder extends Seeder
                 'name' => 'Admin',
                 'email' => 'admin@taramen.com',
                 'email_verified_at' => now(),
-                'password' => Hash::make('password'),
+                'password' => Hash::make('password123'),
             ]);
         }
     }
