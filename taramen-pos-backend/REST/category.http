@@ -20,7 +20,6 @@ Authorization: Bearer {{token}}
 
 {
     "name": "Ramen",
-    "description": "BULALO SINUSUTSUT"
 }
 
 ### READ
