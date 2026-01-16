@@ -1,0 +1,50 @@
+@baseUrl = http://localhost:8000/api/v1
+@email = admin@taramen.com
+@password = password123
+
+@token = 1|FlpydX7oQUPcYs4R95Ma1fNSARwYALMnnrRQTlefcc2f6647
+
+@contentType = application/json
+@accept = application/json
+
+### READ ALL
+GET {{baseUrl}}/categories
+Accept: {{accept}}
+Authorization: Bearer {{token}}
+
+### CREATE
+POST {{baseUrl}}/categories
+Content-Type: {{contentType}}
+Accept: {{accept}}
+Authorization: Bearer {{token}}
+
+{
+    "name": "Ramen",
+    "description": "BULALO SINUSUTSUT"
+}
+
+### READ
+GET {{baseUrl}}/categories/1
+Accept: {{accept}}
+Authorization: Bearer {{token}}
+
+### UPDATE
+PUT {{baseUrl}}/categories/1
+Content-Type: {{contentType}}
+Accept: {{accept}}
+Authorization: Bearer {{token}}
+
+{
+    "name": "Ramenagi",
+    "description": "BULALO SINUSUTSUT."
+}
+
+### DELETE
+DELETE {{baseUrl}}/categories/1
+Accept: {{accept}}
+Authorization: Bearer {{token}}
+
+### ARCHIVE
+GET {{baseUrl}}/categories/archived
+Accept: {{accept}}
+Authorization: Bearer {{token}}

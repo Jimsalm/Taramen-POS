@@ -1,8 +1,8 @@
 @baseUrl = http://localhost:8000/api/v1
 @email = admin@taramen.com
-@password = password
+@password = password123
 
-@token = 2|eset5zJWeg7R0yZTIvJhQj1sP1xdmab4z3dUgSsVa9b31f7a
+@token = 1|FlpydX7oQUPcYs4R95Ma1fNSARwYALMnnrRQTlefcc2f6647
 
 ### ------------------------------------------------------------------------
 ### 1. Login (Public)
