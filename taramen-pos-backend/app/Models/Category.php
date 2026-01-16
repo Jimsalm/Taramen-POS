@@ -16,8 +16,8 @@ class Category extends Model
         'description',
     ];
 
-    public function products(): HasMany
+    public function menuItems(): HasMany
     {
-        return $this->hasMany(Product::class);
+        return $this->hasMany(MenuItem::class);
     }
 }

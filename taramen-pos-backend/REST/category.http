@@ -2,7 +2,7 @@
 @email = admin@taramen.com
 @password = password123
 
-@token = 1|FlpydX7oQUPcYs4R95Ma1fNSARwYALMnnrRQTlefcc2f6647
+@token = 4|9azB0gsEZheSjnFJXpBQkHend3rlvQdSwQaQucDB808e7be8
 
 @contentType = application/json
 @accept = application/json
@@ -20,6 +20,7 @@ Authorization: Bearer {{token}}
 
 {
     "name": "Ramen",
+    "description": "BULALO SINUSUTSUT"
 }
 
 ### READ
