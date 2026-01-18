@@ -28,8 +28,10 @@ class DiscountRequest extends FormRequest
     {
         $rules = [
             'type' => ['required' , new Enum(DiscountType::class)],
-            'value' => [ 'required' ,'decimal:2'],
+            'value' => [ 'required' ,'numeric', 'min:0'],
             'active' => ['boolean'],
+            'menu_items_ids' => ['array'],
+            'menu_items_ids.*' => ['exists:menu_items' , 'id'],
         ];
 
         $discount_id = $this->route('id');
