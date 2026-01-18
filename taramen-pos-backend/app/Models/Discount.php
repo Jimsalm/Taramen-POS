@@ -20,8 +20,8 @@ class Discount extends Model
         'value' => 'decimal:2'
     ];
 
-    public function discount() : BelongsToMany {
-        return $this->belongsToMany(MenuItem::class, );
+    public function menuItems() : BelongsToMany {
+        return $this->belongsToMany(MenuItem::class, 'discount_items');
     }
 
 }

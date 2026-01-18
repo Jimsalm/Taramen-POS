@@ -30,7 +30,7 @@ class MenuItem extends Model
         return $this->belongsTo(Category::class);
     }
 
-    public function menuItems(): BelongsToMany
+    public function discount(): BelongsToMany
     {
         return $this->belongsToMany(Discount::class, 'discount_items');
     }
