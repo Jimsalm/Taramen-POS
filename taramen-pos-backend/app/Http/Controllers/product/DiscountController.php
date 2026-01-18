@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Product\Controllers;
+namespace App\Http\Controllers\Product;
 
 use App\Enum\DiscountType;
 use App\Http\Requests\DiscountRequest;
@@ -38,11 +38,14 @@ class DiscountController extends Controller
 
     public function store(DiscountRequest $request)
     {
-        $validated_data = $request->validate();
+        $validated_data = $request->validated();
         $created_discount = Discount::create($validated_data);
+        $menuItemIds = $validated_data['menu_items_id'] ?? [];
+       $isB1T1 = $validated_data['type'] === DiscountType::B1T1;
 
-        if($validated_data['menu_items_id'] && $validated_data['type'] == DiscountType::B1T1) {
-            $created_discount->menuItems()->attach($validated_data['menu_items_id']);
+
+        if (!empty($menuItemIds) && $isB1T1) {
+            $created_discount->menuItems()->attach($menuItemIds);
         }
 
         return response()->json([
@@ -66,7 +69,7 @@ class DiscountController extends Controller
     public function update(DiscountRequest $request,  $id)
     {
         $discount = Discount::findOrFail($id);
-        $validated_data = $request->validate();
+        $validated_data = $request->validated();
         $discount->update($validated_data);
 
         if($validated_data['menu_items_id'] && $validated_data['type'] == DiscountType::B1T1) {
