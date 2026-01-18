@@ -12,7 +12,7 @@ export default function ICard({
    cardHeaderClassName = "",
 }) {
    return (
-      <Card className={cn("w-full !max-w-md border-none shadow-2xl", cardClassName)}>
+      <Card className={cn("w-full border-none shadow-2xl", cardClassName)}>
          {(title || logo) && (
             <CardHeader className={cn('gap-1 items-center pb-2', cardHeaderClassName)}>
                {logo && <div>{logo}</div>}

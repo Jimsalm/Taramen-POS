@@ -45,7 +45,7 @@ export default function Login() {
                   <img 
                      src="/TARAMEN.jpg" 
                      alt="Ta'ramen POS"
-                     className="size-60 w-auto mx-auto block"
+                     className="size-50 w-auto mx-auto block"
                   />
                }
                title='Welcome Back!'
@@ -53,7 +53,7 @@ export default function Login() {
                cardClassName='text-center w-100 bg-white shadow-xl'
                cardTitleClassName='lg:text-3xl'
             >
-               <Form className='flex flex-col gap-6' onSubmit={onSubmit} schema={loginSchema}>
+               <Form className='flex flex-col gap-6' size- onSubmit={onSubmit} schema={loginSchema}>
                   <IInput name='username' placeholder='Username' prefix={<MailIcon className='size-4 text-black' />} />
                   <IInput
                      name='password'
