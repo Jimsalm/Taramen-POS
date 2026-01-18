@@ -56,5 +56,13 @@ class MenuItemService {
             'available' => true
         ]);
     }
+
+    public function toggleAvailability($id){
+        $menuItem = MenuItem::withTrashed()->findOrFail($id);
+        $menuItem->available = !$menuItem->available;
+        $menuItem->save();
+
+        return $menuItem;
+    }
     
 }

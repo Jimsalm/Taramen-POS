@@ -89,4 +89,17 @@ class MenuItemController extends Controller
             'message' => 'Menu item restored successfully'
         ]);
     }
+
+    public function toggleAvailability($id)
+    {
+        $menuItem = $this->menuItemService->toggleAvailability($id);
+
+        return response()->json([
+            'message' => 'Menu item availability toggled successfully',
+            'data' => [
+                'id' => $menuItem->id,
+                'available' => $menuItem->available
+            ]
+        ]);
+    }
 }
