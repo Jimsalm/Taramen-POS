@@ -2,25 +2,30 @@
 
 namespace App\Http\Controllers\Product;
 
-use App\Enum\DiscountType;
 use App\Http\Requests\DiscountRequest;
 use App\Http\Controllers\Controller;
-use App\Models\Discount;
+use App\Services\DiscountService;
 
 
 class DiscountController extends Controller
 {
+    protected $discountService;
+
+    public function __construct(DiscountService $discountService)
+    {
+    }
 
     public function index()
     {
-        $discounts = Discount::with('menuItems')->get();
-        return response()->json([
+       $discounts = $this->discountService->getAllDiscount();
+       response()->json([
+            "message" => 'discounts fetched successfully',            
             'data' => $discounts
         ],200);
     }
 
     public function getAllActive(){
-        $active_discounts = Discount::with('menuItems')->where('active', true)->get();
+        $active_discounts = $this->discountService->getAllActiveDiscounts();
 
         if(!$active_discounts){
             return response()->json([
@@ -38,16 +43,9 @@ class DiscountController extends Controller
 
     public function store(DiscountRequest $request)
     {
-        $validated_data = $request->validated();
-        $created_discount = Discount::create($validated_data);
-        $menuItemIds = $validated_data['menu_items_id'] ?? [];
-       $isB1T1 = $validated_data['type'] === DiscountType::B1T1;
-
-
-        if (!empty($menuItemIds) && $isB1T1) {
-            $created_discount->menuItems()->attach($menuItemIds);
-        }
-
+        $validated_data = $request->validate();
+        $created_discount = $this->discountService->createDiscount($request);
+        $created_discount->menuItems()->attach($validated_data['menu_items_id']);
         return response()->json([
             'message' => "Discount has been created successfully",
             'discount' => $created_discount
@@ -58,7 +56,7 @@ class DiscountController extends Controller
 
     public function show( $id)
     {
-        $discount = Discount::with('menuItems')->findOrFail($id);
+        $discount = $this->discountService->getOneDiscount($id);
         return response()->json([
             'message' => 'discount found',
             'discount' => $discount
@@ -68,14 +66,11 @@ class DiscountController extends Controller
 
     public function update(DiscountRequest $request,  $id)
     {
-        $discount = Discount::findOrFail($id);
-        $validated_data = $request->validated();
-        $discount->update($validated_data);
-
-        if($validated_data['menu_items_id'] && $validated_data['type'] == DiscountType::B1T1) {
-            $discount->menuItems()->sync($validated_data['menu_items_id']);
-        }
-
+        $payload = $this->discountService->updateDiscount($request, $id);
+        $discount = $payload[0];
+        $validated_data = $payload[1];
+        $discount->menuItems()->sync($validated_data['menu_items_id']);
+        
         return response()->json([
             'message' => 'discount has been updated successfully',
             'updated_discount' => $validated_data
@@ -85,9 +80,7 @@ class DiscountController extends Controller
 
     public function destroy( $id)
     {
-        $discount = Discount::findOrFail($id);
-        $discount->delete();
-
+        $discount = $this->discountService->deleteDiscount($id);
         return response()->json([
             'message' => 'Discount deleted successfully',
             'category' => $discount
