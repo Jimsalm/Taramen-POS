@@ -34,7 +34,7 @@ class DiscountRequest extends FormRequest
             'menu_items_ids.*' => ['exists:menu_items' , 'id'],
         ];
 
-        $discount_id = $this->route('id');
+        $discount_id = $this->route('discount');
 
         $rules['name'] = [
             'required',
