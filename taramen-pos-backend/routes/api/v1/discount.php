@@ -7,6 +7,6 @@ use Illuminate\Support\Facades\Route;
 
 // Protected Routes
 Route::middleware('auth:sanctum')->group(function () {
-    Route::apiResource('discounts', DiscountController::class);
+    Route::apiResource('discount', DiscountController::class);
     Route::get('discounts/getActive', [DiscountController::class, 'getAllActive']);
 });

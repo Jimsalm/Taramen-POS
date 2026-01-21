@@ -2,25 +2,30 @@
 
 namespace App\Http\Controllers\Product;
 
-use App\Enum\DiscountType;
 use App\Http\Requests\DiscountRequest;
 use App\Http\Controllers\Controller;
-use App\Models\Discount;
+use App\Services\DiscountService;
 
 
 class DiscountController extends Controller
 {
+    protected $discountService;
+
+    public function __construct(DiscountService $discountService)
+    {
+    }
 
     public function index()
     {
-        $discounts = Discount::with('menuItems')->get();
-        return response()->json([
+       $discounts = $this->discountService->getAllDiscount();
+       response()->json([
+            "message" => 'discounts fetched successfully',            
             'data' => $discounts
         ],200);
     }
 
     public function getAllActive(){
-        $active_discounts = Discount::with('menuItems')->where('active', true)->get();
+        $active_discounts = $this->discountService->getAllActiveDiscounts();
 
         if(!$active_discounts){
             return response()->json([
@@ -55,7 +60,7 @@ class DiscountController extends Controller
 
     public function show($id)
     {
-        $discount = Discount::with('menuItems')->findOrFail($id);
+        $discount = $this->discountService->getOneDiscount($id);
         return response()->json([
             'message' => 'discount found',
             'discount' => $discount
@@ -82,9 +87,7 @@ class DiscountController extends Controller
 
     public function destroy( $id)
     {
-        $discount = Discount::findOrFail($id);
-        $discount->delete();
-
+        $discount = $this->discountService->deleteDiscount($id);
         return response()->json([
             'message' => 'Discount deleted successfully',
             'category' => $discount
