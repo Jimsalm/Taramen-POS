@@ -43,7 +43,9 @@ class DiscountRequest extends FormRequest
             'active' => ['sometimes', 'boolean'],
 
             'menu_items_id' => ['nullable', 'array'],
-            'menu_items_id.*' => ['exists:menu_items,id'], 
+            'menu_items_id.*' => ['exists:menu_items,id'],
+            'created_at' => ['sometimes', 'date'],
+            'updated_at' => ['sometimes', 'date'],
         ];
 
         $discount_id = $this->route('id') ?? $this->route('discounts');
