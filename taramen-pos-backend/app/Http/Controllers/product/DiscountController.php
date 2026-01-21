@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Product\Controllers;
+namespace App\Http\Controllers\Product;
 
 use App\Enum\DiscountType;
 use App\Http\Requests\DiscountRequest;
@@ -38,22 +38,22 @@ class DiscountController extends Controller
 
     public function store(DiscountRequest $request)
     {
-        $validated_data = $request->validate();
+        $validated_data = $request->validated();
         $created_discount = Discount::create($validated_data);
 
-        if($validated_data['menu_items_id'] && $validated_data['type'] == DiscountType::B1T1) {
+        if (isset($validated_data['menu_items_id']) && !empty($validated_data['menu_items_id'])) {
             $created_discount->menuItems()->attach($validated_data['menu_items_id']);
         }
 
         return response()->json([
             'message' => "Discount has been created successfully",
-            'discount' => $created_discount
+            'discount' => $created_discount->load('menuItems')
         ],201);
 
     }
 
 
-    public function show( $id)
+    public function show($id)
     {
         $discount = Discount::with('menuItems')->findOrFail($id);
         return response()->json([
@@ -66,10 +66,10 @@ class DiscountController extends Controller
     public function update(DiscountRequest $request,  $id)
     {
         $discount = Discount::findOrFail($id);
-        $validated_data = $request->validate();
+        $validated_data = $request->validated();
         $discount->update($validated_data);
 
-        if($validated_data['menu_items_id'] && $validated_data['type'] == DiscountType::B1T1) {
+        if (array_key_exists('menu_items_id', $validated_data)) {
             $discount->menuItems()->sync($validated_data['menu_items_id']);
         }
 

@@ -26,18 +26,30 @@ class DiscountRequest extends FormRequest
      */
     public function rules(): array
     {
+        $isUpdate = $this->routeIs('*.update');
+
         $rules = [
-            'type' => ['required' , new Enum(DiscountType::class)],
-            'value' => [ 'required' ,'numeric', 'min:0'],
-            'active' => ['boolean'],
-            'menu_items_ids' => ['array'],
-            'menu_items_ids.*' => ['exists:menu_items' , 'id'],
+            'type' => [
+                $isUpdate ? 'sometimes' : 'required', 
+                new Enum(DiscountType::class)
+            ],
+            
+            'value' => [
+                $isUpdate ? 'sometimes' : 'required', 
+                'numeric', 
+                'min:0'
+            ],
+            
+            'active' => ['sometimes', 'boolean'],
+
+            'menu_items_id' => ['nullable', 'array'],
+            'menu_items_id.*' => ['exists:menu_items,id'], 
         ];
 
-        $discount_id = $this->route('id');
+        $discount_id = $this->route('id') ?? $this->route('discounts');
 
         $rules['name'] = [
-            'required',
+            $isUpdate ? 'sometimes' : 'required',
             'string',
             'max:255',
             Rule::unique('discounts', 'name')->ignore($discount_id)
