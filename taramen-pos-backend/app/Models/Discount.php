@@ -21,7 +21,7 @@ class Discount extends Model
     ];
 
     public function menuItems() : BelongsToMany {
-        return $this->belongsToMany(MenuItem::class, 'discount_items');
+        return $this->belongsToMany(MenuItem::class, 'discount_items')->withTimestamps();
     }
 
 }

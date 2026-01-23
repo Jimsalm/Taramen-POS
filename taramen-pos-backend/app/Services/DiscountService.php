@@ -16,10 +16,15 @@ class DiscountService{
 
     public function createDiscount($request){
         
-        $validated_data = $request->validate();
-        $created_discount = Discount::create($validated_data);
-        return $created_discount;
+        $discount = Discount::create($request->validated());
+        
+        if (isset($request->menu_items_id)) {
+            $discount->menuItems()->attach($request->menu_items_id);
+        }
+
+        return $discount->load('menuItems');
     }
+    
     public function getOneDiscount($id){
         return Discount::with('menuItems')->findOrFail($id);
     }
