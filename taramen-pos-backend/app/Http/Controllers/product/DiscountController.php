@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Product;
 
 use App\Http\Requests\DiscountRequest;
 use App\Http\Controllers\Controller;
+use App\Models\Discount;
 use App\Services\DiscountService;
 
 

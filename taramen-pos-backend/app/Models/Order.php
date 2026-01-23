@@ -43,7 +43,7 @@ class Order extends Model
     public function calculateTotalAmount()
     {
         $this->subtotal = $this->orderItems()->sum('subtotal');
-        $this->total_discount = $this->orderItems()->sum('total_discount');
+        $this->total_discount = $this->orderItems()->sum('discount_amount');
         $this->total_amount = $this->orderItems()->sum('total_amount');
     }
 }
