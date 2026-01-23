@@ -34,10 +34,14 @@ class Order extends Model
 
     public static function generateOrderNumber()
     {
-        $prefix = 'ORD-';
-        $latestOrder = self::latest()->first();
-        $nextNumber = $latestOrder ? (int) substr($latestOrder->order_number, 3) + 1 : 1;
-        return $prefix . str_pad($nextNumber, 5, '0', STR_PAD_LEFT);
+        $date = now()->format('Ymd');
+        $lastOrder = self::whereDate('created_at', today())
+            ->orderBy('id', 'desc')
+            ->first();
+        
+        $sequence = $lastOrder ? intval(substr($lastOrder->order_number, -4)) + 1 : 1;
+        
+        return $date . str_pad($sequence, 4, '0', STR_PAD_LEFT);
     }
 
     public function calculateTotalAmount()
