@@ -40,7 +40,7 @@ class OrderService{
         if(isset($filters['today']) && $filters['today']){
             $query->whereDate('created_at', today());
         }
-        
+
         return $query->latest()->get();
     }
         
@@ -148,5 +148,30 @@ class OrderService{
         $order->delete();
 
         return $order;
+    }
+
+    public function getOrderStats($filters = []){
+        $query = Order::query();
+
+        if (isset($filters['date_from'])){
+            $query->whereDate('created_at', '>=', $filters['date_from']);
+        }
+
+        if (isset($filters['date_to'])){
+            $query->whereDate('created_at', '<=', $filters['date_to']);
+        }
+
+        if (isset($filters['today']) && $filters['today']){
+            $query->whereDate('created_at', today());
+        }
+
+        return [
+            'total_orders' => (clone $query)->count(),
+            'pending_orders' => (clone $query)->where('status', 'pending')->count(),
+            'completed_orders' => (clone $query)->where('status', 'completed')->count(),
+            'cancelled_orders' => (clone $query)->where('status', 'cancelled')->count(),
+            'total_sales' => (clone $query)->where('status', 'completed')->sum('total_amount'),
+            'total_discounts' => (clone $query)->where('status', 'completed')->sum('total_discount'),
+        ];
     }
 }

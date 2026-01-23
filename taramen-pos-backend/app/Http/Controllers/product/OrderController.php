@@ -101,4 +101,20 @@ class OrderController extends Controller
             ], 500);
         }
     }
+
+    public function stats(Request $request)
+    {
+        $filter = $request->only([
+            'date_from',
+            'date_to',
+            'today'
+        ]);
+
+        $stats = $this->orderService->getOrderStats($filter);
+
+        return response()->json([
+            'message' => 'Order stats retrieved successfully',
+            'data' => $stats
+        ], 200);
+    }
 }
