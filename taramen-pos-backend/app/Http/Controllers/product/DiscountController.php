@@ -10,9 +10,8 @@ use App\Services\DiscountService;
 
 class DiscountController extends Controller
 {
-    protected $discountService;
 
-    public function __construct(DiscountService $discountService)
+    public function __construct(protected DiscountService $discountService)
     {
     }
 
@@ -45,16 +44,11 @@ class DiscountController extends Controller
 
     public function store(DiscountRequest $request)
     {
-        $validated_data = $request->validated();
-        $created_discount = Discount::create($validated_data);
-
-        if (isset($validated_data['menu_items_id']) && !empty($validated_data['menu_items_id'])) {
-            $created_discount->menuItems()->attach($validated_data['menu_items_id']);
-        }
+        $created_discount = $this->discountService->createDiscount($request);
 
         return response()->json([
             'message' => "Discount has been created successfully",
-            'discount' => $created_discount->load('menuItems')
+            'discount' => $created_discount
         ],201);
 
     }
