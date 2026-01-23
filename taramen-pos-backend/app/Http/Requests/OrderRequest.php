@@ -21,23 +21,37 @@ class OrderRequest extends FormRequest
      */
     public function rules(): array
     {
-        $isUpdate = $this->routeIs('*.update');
+        $isStatusUpdate = $this->routeIs('*.updateStatus');
+
+        if ($isStatusUpdate) {
+            return [
+                'status' => 'required|string|in:pending,completed,cancelled'
+            ];
+        }
+
+        $isStore = $this->isMethod('post');
+        $isGetStats = $this->isMethod('get');
 
         $rules = [
             'employee_id' => [
-                $isUpdate ? 'sometimes' : 'required',
+                $isStore ? 'required' : 'sometimes',
                 'integer',
                 'exists:employees,id'
             ],
             'table_number' => [
-                $isUpdate ? 'sometimes' : 'required',
+                $isStore ? 'required' : 'sometimes',
                 'string',
                 'max:50'
             ],
             'status' => [ 'sometimes', 'in:pending,completed,cancelled' ],
-            'items' => [ $isUpdate ? 'sometimes' : 'required', 'array', 'min:1' ],
-            'items.*.menu_item_id' => [ 'required', 'integer', 'exists:menu_items,id' ],
-            'items.*.quantity' => [ 'required', 'integer', 'min:1' ],
+
+            'date_from' => [ 'sometimes', 'date' ],
+            'date_to' => [ 'sometimes', 'date', 'after_or_equal:date_from' ],
+            'today' => [ 'sometimes', 'boolean' ],
+
+            'items' => [ $isStore ? 'required' : 'sometimes', 'array', 'min:1' ],
+            'items.*.menu_item_id' => [ $isStore ? 'required' : 'sometimes', 'integer', 'exists:menu_items,id' ],
+            'items.*.quantity' => [ $isStore ? 'required' : 'sometimes', 'integer', 'min:1' ],
             'items.*.discount_id' => [ 'sometimes', 'integer', 'exists:discounts,id' ],
         ];
 

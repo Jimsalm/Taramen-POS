@@ -13,16 +13,9 @@ class OrderController extends Controller
         protected OrderService $orderService
     ) {}
     
-    public function index(Request $request)
+    public function index(OrderRequest $request)
     {
-        $filter = $request->only([
-            'status',
-            'employee_id',
-            'table_number',
-            'date_from',
-            'date_to',
-            'today'
-        ]);
+        $filter = $request->validated();
 
         $orders = $this->orderService->getFilteredOrders($filter);
 
@@ -84,12 +77,8 @@ class OrderController extends Controller
         }
     }
 
-    public function updateStatus(Request $request, $id)
+    public function updateStatus(OrderRequest $request, $id)
     {
-        $request->validate([
-            'status' => 'required|string|in:pending,completed,cancelled'
-        ]);
-
         try {
             $order = $this->orderService->updateOrderStatus($id, $request->status);
 
@@ -123,13 +112,9 @@ class OrderController extends Controller
         }
     }
 
-    public function stats(Request $request)
+    public function stats(OrderRequest $request)
     {
-        $filter = $request->only([
-            'date_from',
-            'date_to',
-            'today'
-        ]);
+        $filter = $request->validated();
 
         $stats = $this->orderService->getOrderStats($filter);
 
