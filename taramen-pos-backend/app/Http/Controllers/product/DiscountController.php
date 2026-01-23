@@ -19,7 +19,8 @@ class DiscountController extends Controller
     public function index()
     {
        $discounts = $this->discountService->getAllDiscount();
-       response()->json([
+
+       return response()->json([
             "message" => 'discounts fetched successfully',            
             'data' => $discounts
         ],200);
