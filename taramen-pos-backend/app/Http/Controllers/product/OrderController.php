@@ -13,9 +13,23 @@ class OrderController extends Controller
         protected OrderService $orderService
     ) {}
     
-    public function index()
+    public function index(Request $request)
     {
-        return $this->orderService->getAllOrders();
+        $filter = $request->only([
+            'status',
+            'employee_id',
+            'table_number',
+            'date_from',
+            'date_to',
+            'today'
+        ]);
+
+        $orders = $this->orderService->getFilteredOrders($filter);
+
+        return response()->json([
+            'message' => 'Orders retrieved successfully',
+            'data' => $orders
+        ], 200);
     }
   
     public function store(OrderRequest $request)

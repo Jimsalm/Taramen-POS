@@ -14,6 +14,37 @@ class OrderService{
         return Order::with('orderItems', 'employee')->latest()->get();
     }
 
+    public function getFilteredOrders($filters = []){
+        $query = Order::with('orderItems', 'employee');
+
+        if(isset($filters['status'])){
+            $query->where('status', $filters['status']);
+        }
+
+        if(isset($filters['employee_id'])){
+            $query->where('employee_id', $filters['employee_id']);
+        }
+
+        if(isset($filters['table_number'])){
+            $query->where('table_number', $filters['table_number']);
+        }
+
+        if(isset($filters['date_from'])){
+            $query->whereDate('created_at', '>=', $filters['date_from']);
+        }
+
+        if(isset($filters['date_to'])){
+            $query->whereDate('created_at', '<=', $filters['date_to']);
+        }
+
+        if(isset($filters['today']) && $filters['today']){
+            $query->whereDate('created_at', today());
+        }
+        
+        return $query->latest()->get();
+    }
+        
+
     public function createOrder($request){
         
         return DB::transaction(function () use ($request) {
