@@ -138,6 +138,12 @@ class OrderService{
         return $order->fresh(['orderItems', 'employee']);
     }
 
+    public function updateOrderStatus($id, $status){
+        $order = Order::findOrFail($id);
+        $order->update(['status' => $status]);
+        return $order->fresh(['orderItems', 'employee']);
+    }
+
     public function deleteOrder($id){
         $order = Order::findOrFail($id);
         

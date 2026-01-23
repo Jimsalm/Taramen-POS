@@ -84,6 +84,27 @@ class OrderController extends Controller
         }
     }
 
+    public function updateStatus(Request $request, $id)
+    {
+        $request->validate([
+            'status' => 'required|string|in:pending,completed,cancelled'
+        ]);
+
+        try {
+            $order = $this->orderService->updateOrderStatus($id, $request->status);
+
+            return response()->json([
+                'message' => 'Order status updated successfully',
+                'data' => $order
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'Failed to update order status',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
     
     public function destroy($id)
     {
