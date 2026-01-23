@@ -13,6 +13,17 @@ return new class extends Migration
     {
         Schema::create('order_items', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('order_id')->constrained()->onDelete('cascade');
+            $table->foreignId('menu_item_id')->constrained()->onDelete('cascade');
+            $table->string('item_name');
+            $table->decimal('unit_price', 10, 2);
+            $table->integer('quantity');
+            $table->decimal('subtotal', 10, 2);
+            $table->foreignId('discount_id')->nullable()->constrained('discounts');
+            $table->enum('discount_type', ['percentage', 'fixed', 'buy1take1'])->default('percentage')->nullable();
+            $table->string('discount_name')->nullable();
+            $table->decimal('discount_amount', 10, 2)->default(0);
+            $table->decimal('total_amount', 10, 2);
             $table->timestamps();
         });
     }
