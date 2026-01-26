@@ -130,7 +130,7 @@ export default function IInput({
                ))}
          </div>
 
-         {showError && error && <p className='text-xs font-medium text-red-500 text-start'>{error}</p>}
+         {showError && error && <p className='text-md font-medium text-red-500 text-start'>{error}</p>}
       </div>
    );
 }

@@ -10,6 +10,7 @@ export default function ICard({
    cardContentClassName = "",
    cardTitleClassName = "",
    cardHeaderClassName = "",
+   descriptionClassName = "",
 }) {
    return (
       <Card className={cn("w-full border-none shadow-2xl", cardClassName)}>
@@ -21,7 +22,7 @@ export default function ICard({
                      {title}
                   </CardTitle>
                )}
-               {description && <CardDescription>{description}</CardDescription>}
+               {description && <CardDescription className={descriptionClassName}>{description}</CardDescription>}
             </CardHeader>
          )}
          <CardContent className={cn("pt-4", cardContentClassName)}>
