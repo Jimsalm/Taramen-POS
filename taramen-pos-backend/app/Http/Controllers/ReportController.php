@@ -3,9 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Carbon\Carbon;
-use App\Models\Order;
-use App\Models\OrderItem;
+use App\Http\Requests\ReportRequest;
 use App\Services\ReportService;
 
 class ReportController extends Controller
@@ -13,9 +11,13 @@ class ReportController extends Controller
     public function __construct(protected ReportService $reportService) {
 
     }
-    public function summary(Request $request) {
-        $start = $request->get('start_date' , today()->format('Y-m-d'));
-        $end = $request->get('end_date', $start);
+    public function summary(ReportRequest $request) {
+        $validated = $request->validated();
+
+     
+        $start = $validated['start_date'] ?? today()->format('Y-m-d');
+
+        $end = $validated['end_date'] ?? $start;
 
         $summary =  $this->reportService->summaryService($start, $end) ;
 
