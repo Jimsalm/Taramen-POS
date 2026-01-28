@@ -14,7 +14,7 @@ class OrderService{
         return Order::with('orderItems', 'employee')->latest()->get();
     }
 
-    public function getFilteredOrders($filters = []){
+    public function getFilteredOrders($filters = [], $perPage = 10){
         $query = Order::with('orderItems', 'employee');
 
         if(isset($filters['status'])){
@@ -41,7 +41,7 @@ class OrderService{
             $query->whereDate('created_at', today());
         }
 
-        return $query->latest()->get();
+        return $query->latest()->paginate($perPage);
     }
         
 

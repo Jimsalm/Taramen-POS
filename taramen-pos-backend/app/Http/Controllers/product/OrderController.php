@@ -17,7 +17,8 @@ class OrderController extends Controller
     {
         $filter = $request->validated();
 
-        $orders = $this->orderService->getFilteredOrders($filter);
+        $perPage = $request->input('per_page', 10);
+        $orders = $this->orderService->getFilteredOrders($filter, $perPage);
 
         return response()->json([
             'message' => 'Orders retrieved successfully',
