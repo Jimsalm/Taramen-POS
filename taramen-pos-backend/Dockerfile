@@ -1,11 +1,15 @@
-# --- Build stage: install PHP deps with Composer ---
-FROM composer:2 AS vendor
+# --- Build stage: PHP CLI + Composer + extensions ---
+FROM php:8.2-cli-bullseye AS vendor
 
+RUN apt-get update && apt-get install -y git unzip libpq-dev \
+  && docker-php-ext-install pdo_pgsql pgsql \
+  && rm -rf /var/lib/apt/lists/*
+
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /app
-
-# Copy the whole project so artisan exists for package:discover
 COPY . .
+
 RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
 
 # --- Runtime stage: PHP-FPM + Nginx + Supervisor ---
