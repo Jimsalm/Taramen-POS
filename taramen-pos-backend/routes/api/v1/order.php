@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Product\OrderController;
+use App\Http\Controllers\product\OrderController;
 
 Route::middleware(['auth:sanctum'])->group(function () {
 
