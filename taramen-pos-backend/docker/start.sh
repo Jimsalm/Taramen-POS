@@ -7,11 +7,11 @@ set -e
 # Render nginx.conf uses ${PORT}; substitute it at runtime
 # (envsubst is in gettext-base; bullseye image may not include it by default)
 # We'll do a simple sed replacement instead:
-sed -i "s/\${PORT}/$PORT/g" /etc/nginx/nginx.conf
+sed "s/__PORT__/${PORT}/g" /var/www/html/docker/nginx.conf.template > /etc/nginx/nginx.conf
 
-# Laravel optimizations (safe)
 php artisan config:clear || true
-php artisan cache:clear || true
+# don't run cache:clear until CACHE_DRIVER is file
+php artisan migrate --force || true
 
 # IMPORTANT: do NOT route:cache if your routes include closures that aren't cacheable.
 # php artisan route:cache || true
