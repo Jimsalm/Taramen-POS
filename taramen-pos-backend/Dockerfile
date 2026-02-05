@@ -1,8 +1,11 @@
 # --- Build stage: install PHP deps with Composer ---
 FROM composer:2 AS vendor
 
+
 WORKDIR /app
-COPY composer.json composer.lock ./
+
+# Copy the whole project so artisan exists for package:discover
+COPY . .
 RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
 
 # --- Runtime stage: PHP-FPM + Nginx + Supervisor ---
