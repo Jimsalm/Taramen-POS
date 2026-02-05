@@ -49,6 +49,8 @@ class OrderRequest extends FormRequest
             'date_to' => [ 'sometimes', 'date', 'after_or_equal:date_from' ],
             'today' => [ 'sometimes', 'boolean' ],
 
+            'per_page' => [ 'sometimes', 'integer', 'min:1', 'max:100' ],
+
             'items' => [ $isStore ? 'required' : 'sometimes', 'array', 'min:1' ],
             'items.*.menu_item_id' => [ $isStore ? 'required' : 'sometimes', 'integer', 'exists:menu_items,id' ],
             'items.*.quantity' => [ $isStore ? 'required' : 'sometimes', 'integer', 'min:1' ],

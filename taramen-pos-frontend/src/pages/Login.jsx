@@ -39,30 +39,38 @@ export default function Login() {
 
    return (
       <LoginLayout>
-         <section className='flex flex-col lg:flex-row items-start mx-auto lg:gap-12 lg:pr-24 mb-12 lg:mb-0'>
+         <section className='flex flex-col items-center justify-center mb-12 lg:mb-0'>
             <ICard
                logo={
                   <img 
-                     src="/TARAMEN.jpg" 
+                     src="/Taramen.png" 
                      alt="Ta'ramen POS"
                      className="size-50 w-auto mx-auto block"
                   />
                }
                title='Welcome Back!'
                description='Enter your credentials to access your account'
-               cardClassName='text-center w-100 bg-white shadow-xl'
-               cardTitleClassName='lg:text-3xl'
+               descriptionClassName='text-gray-600'
+               cardClassName='text-center w-128 bg-white hover:bg-gray-50 transition-all duration-300 relative overflow-hidden border-0 shadow-2xl shadow-black/60'
+               cardContentClassName='pb-14 w-96 mx-auto'
+               cardTitleClassName='md:text-3xl text-[#FF0605]'
             >
                <Form className='flex flex-col gap-6' size- onSubmit={onSubmit} schema={loginSchema}>
-                  <IInput name='username' placeholder='Username' prefix={<MailIcon className='size-4 text-black' />} />
+                  <IInput name='username' placeholder='Username' prefix={<MailIcon className='size-4 text-gray-500' />} className='h-12' />
                   <IInput
                      name='password'
                      type='password'
                      placeholder='Password'
-                     prefix={<LockIcon className='size-4 text-black' />}
+                     prefix={<LockIcon className='size-4 text-gray-500' />}
+                     className='h-12'
                   />
-                  <IButton type='submit' variant='brandRed' className='w-full'>
-                     Sign In
+                  <div className='flex justify-end'>
+                     <IButton type='button' variant='ghost' className='text-sm text-[#FF0605] p-0 h-auto'>
+                        Forgot Password?
+                     </IButton>
+                  </div>
+                  <IButton type='submit' variant='destructive' className='w-full'>
+                     Log in
                   </IButton>
 
                   {error && <IAlert description={error} />}

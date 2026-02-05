@@ -3,6 +3,9 @@ FROM composer:2 AS vendor
 
 WORKDIR /app
 COPY composer.json composer.lock ./
+RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
+
+# --- Runtime stage: PHP-FPM + Nginx + Supervisor ---
 FROM php:8.2-fpm-bullseye
 
 # System deps + nginx + supervisor + pgsql extensions
