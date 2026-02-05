@@ -1,4 +1,4 @@
-import { ChevronRight, LogOutIcon, MoreHorizontal, User2 } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 
 import {
    Sidebar,
@@ -6,182 +6,252 @@ import {
    SidebarFooter,
    SidebarGroup,
    SidebarGroupContent,
-   SidebarGroupLabel,
+   SidebarHeader,
    SidebarMenu,
    SidebarMenuButton,
    SidebarMenuItem,
    SidebarMenuSub,
    SidebarMenuSubItem,
-   SidebarProvider,
-   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
+
 import { useNavigate, useLocation } from "react-router-dom";
-import { MODULES } from "@/shared/constants/routes";
+import { MODULES, DASHBOARD } from "@/shared/constants/routes";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "../ui/collapsible";
 import { cn } from "@/shared/lib/utils";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "../ui/tooltip";
+import { getUserAvailableModules, isRouteDisabled } from "@/shared/helpers/auth";
+import { useEffect, useMemo } from "react";
+import useSidebarStore from "@/store/sidebarStore";
+import ITooltip from "./Tooltip";
+import Title from "./Title";
 
-export function AppSidebar({ user }) {
+
+export function AppSidebar({ user, enableCollapse = true }) {
    const navigate = useNavigate();
    const location = useLocation();
-   const onSignOut = () => {
-      // Simple logout - clear localStorage and navigate to login
-      localStorage.removeItem("token");
-      navigate("/");
-   };
+   const { isHovered, setIsHovered, setIsCollapsed, openItems, setOpenItems, resetOpenItems, isMobile, setIsMobile } =
+      useSidebarStore();
 
-   const FOOTER_ITEMS = [
-      { label: "Account", icon: User2, onClick: () => console.log("Account clicked") },
-      {
-         label: "Sign Out",
-         icon: LogOutIcon,
-         onClick: onSignOut,
-         className: "text-destructive",
-      },
-   ];
+   const { availableModules, isCollapsed } = useMemo(() => {
+      const isRouteDashboard = location.pathname === DASHBOARD.path;
+
+      return {
+         availableModules: getUserAvailableModules(user, MODULES),
+         isCollapsed: !isRouteDashboard && !isHovered && enableCollapse,
+      };
+   }, [user, location.pathname, isHovered, enableCollapse]);
+
+   useEffect(() => {
+      const checkMobile = () => setIsMobile(window.innerWidth < 768);
+      checkMobile();
+      window.addEventListener("resize", checkMobile);
+      return () => window.removeEventListener("resize", checkMobile);
+   }, [setIsMobile]);
+
+   useEffect(() => {
+      setIsHovered(false);
+      resetOpenItems();
+   }, []);
+
+   useEffect(() => {
+      setIsCollapsed(isCollapsed && enableCollapse);
+      if (isCollapsed) resetOpenItems();
+   }, [isCollapsed, enableCollapse]);
 
    return (
-      <TooltipProvider>
-         <Sidebar collapsible="icon" className='border border-sidebar-border'>
-         <SidebarContent className='p-2 bg-sidebar border border-sidebar-border text-sidebar-foreground'>
-            {MODULES.map((module, index) =>
-               module.modules.some((item) => !item.roles || item.roles.includes(user.role)) ? (
-                  <SidebarGroup key={index}>
-                     <SidebarGroupLabel className='text-sidebar-foreground'>{module.title}</SidebarGroupLabel>
-                     <SidebarGroupContent>
-                        <SidebarMenu className='gap-0 w-full'>
-                           {module.modules.map((item) =>
-                              item.roles && !item.roles.includes(user.role) ? null : item.children &&
-                                item.children.length > 0 ? (
-                                 <Collapsible key={item.title} className='group' asChild>
-                                    <SidebarMenuItem>
-                                       <CollapsibleTrigger asChild>
-                                          <SidebarMenuButton asChild>
-                                             <div
-                                                className={cn(
-                                                   "flex items-center justify-between gap-3 w-full text-sidebar-foreground text-base cursor-pointer select-none hover:bg-secondary/5! rounded hover:text-secondary! transition-all",
-                                                   location.pathname.includes("inventory") &&
-                                                      "bg-secondary/5! font-semibold text-secondary!",
-                                                )}
-                                             >
-                                                <div className='flex items-center gap-2 mx-1.5'>
-                                                   <item.icon className='size-4' />
-                                                   <h1>{item.title}</h1>
-                                                </div>
-                                                <ChevronRight className='size-4 transition-transform duration-200 ease-in-out group-data-[state=open]:rotate-90' />
-                                             </div>
-                                          </SidebarMenuButton>
-                                       </CollapsibleTrigger>
-
-                                       <CollapsibleContent className='border-l border-gray-400' asChild>
-                                          <SidebarMenuSub>
-                                             {item.children.map((child) =>
-                                                child.roles && !child.roles.includes(user.role) ? null : (
-                                                   <SidebarMenuSubItem key={child.title}>
-                                                      <SidebarMenuButton type='button' className='h-6' asChild>
-                                                         <div
-                                                            className={cn(
-                                                               "flex items-center gap-3 w-full text-sidebar-foreground hover:text-secondary hover:bg-secondary/5 transition-all text-base cursor-pointer select-none",
-                                                            )}
-                                                            onClick={() => navigate(child.path)}
-                                                         >
-                                                            {child.icon ? (
-                                                               <child.icon className='size-4' />
-                                                            ) : (
-                                                               <span className='size-4' />
-                                                            )}
-                                                            <h1>{child.title}</h1>
-                                                         </div>
-                                                      </SidebarMenuButton>
-                                                   </SidebarMenuSubItem>
-                                                ),
-                                             )}
-                                          </SidebarMenuSub>
-                                       </CollapsibleContent>
-                                    </SidebarMenuItem>
-                                 </Collapsible>
-                              ) : (
-                                 <SidebarMenuItem key={item.title}>
-                                    <SidebarMenuButton asChild>
-                                       <Tooltip>
-                                          <TooltipTrigger asChild>
-                                             <div
-                                                className={cn(
-                                                   `flex items-center justify-between gap-3 w-full text-sidebar-foreground hover:bg-secondary/5 rounded p-1.5 hover:text-secondary transition-all text-base cursor-pointer select-none`,
-                                                   item.disabled && "opacity-50",
-                                                   location.pathname === item.path &&
-                                                      "bg-secondary/5 font-semibold text-secondary",
-                                                )}
-                                                onClick={() => (item.disabled ? {} : navigate(item.path))}
-                                             >
-                                                <div className='flex items-center gap-2 w-full text-sm'>
-                                                   <item.icon className='size-4' />
-                                                   <h1>{item.title}</h1>
-                                                </div>
-                                             </div>
-                                          </TooltipTrigger>
-                                          {item.disabled && (
-                                             <TooltipContent side="right" sideOffset={0}>
-                                                <p>Under Development</p>
-                                             </TooltipContent>
-                                          )}
-                                       </Tooltip>
-                                    </SidebarMenuButton>
-                                 </SidebarMenuItem>
-                              ),
-                           )}
-                        </SidebarMenu>
-                     </SidebarGroupContent>
-                  </SidebarGroup>
-               ) : null,
-            )}
-
+      <Sidebar
+         className={cn(
+            "border border-sidebar-border md:mt-16 transition-all duration-500 ease-in-out",
+            isCollapsed ? "w-22" : "w-64 lg:w-90",
+         )}
+         onMouseEnter={() => setIsHovered(true)}
+         onMouseLeave={() => setIsHovered(false)}
+         onClick={() => setIsHovered(true)}
+      >
+         <SidebarContent className='bg-sidebar border border-sidebar-border text-sidebar-foreground p-2'>
             <SidebarGroup>
-               <SidebarGroupLabel className='text-sidebar-foreground'>Account</SidebarGroupLabel>
                <SidebarGroupContent>
-                  <SidebarMenuItem className='flex items-center justify-between'>
-                     <SidebarMenuButton asChild>
-                        <div className='flex items-center justify-between'>
-                           <span className='flex items-center gap-2'>
-                              <User2 className='size-4' />
-                              <span>{user.username}</span>
-                           </span>
-                           <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                 <MoreHorizontal className='cursor-pointer size-4 text-gray-500' />
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent>
-                                 {FOOTER_ITEMS.map((item, index) => (
-                                    <DropdownMenuItem key={index} onClick={item.onClick} className={item.className}>
-                                       {item.icon && <item.icon className='mr-2 size-4' />}
-                                       {item.label}
-                                    </DropdownMenuItem>
-                                 ))}
-                              </DropdownMenuContent>
-                           </DropdownMenu>
-                        </div>
-                     </SidebarMenuButton>
-                  </SidebarMenuItem>
+                  <SidebarHeader className='mb-2 flex md:hidden items-center gap-2'>
+                     <img src={BulsuLogo} alt='Bulsu Logo' className='size-12' />
+                     <header className='flex items-center gap-2'>
+                        <Title className={cn("")}>Elib Management System</Title>
+                     </header>
+                  </SidebarHeader>
+
+                  <SidebarMenu className='gap-0.5 w-full'>
+                     {availableModules.map((item) =>
+                        item.children && item.children.length > 0 ? (
+                           <Collapsible
+                              key={item.title}
+                              className='group'
+                              asChild
+                              open={isMobile || !isCollapsed ? openItems[item.title] || false : false}
+                              onOpenChange={(open) => setOpenItems({ ...openItems, [item.title]: open })}
+                           >
+                              <SidebarMenuItem>
+                                 <CollapsibleTrigger asChild>
+                                    <SidebarMenuButton asChild className='h-auto px-1.5 py-3! relative mt-0.5'>
+                                       <div
+                                          className={cn(
+                                             `flex items-center gap-2 sm:gap-3 w-full hover:bg-primary! hover:text-white! rounded-lg transition-all text-sm sm:text-base cursor-pointer select-none`,
+                                             item.disabled && "opacity-50",
+                                             location.pathname.includes(item.path) &&
+                                                "bg-primary text-white font-semibold",
+                                          )}
+                                       >
+                                          <span
+                                             className={cn(
+                                                "flex items-center gap-4 mx-1 font-semibold text-sm lg:text-base",
+                                                location.pathname === item.path && "text-white",
+                                             )}
+                                          >
+                                             <item.icon className='size-6 ml-1.5' />
+                                             <h1
+                                                className={cn(
+                                                   "absolute left-14 whitespace-nowrap transition-opacity duration-300 ease-in-out flex items-center w-full",
+                                                   isMobile
+                                                      ? "opacity-100"
+                                                      : isCollapsed
+                                                        ? "opacity-0 w-0"
+                                                        : "opacity-100 delay-100",
+                                                )}
+                                             >
+                                                {item.title}
+                                             </h1>
+                                             <ChevronRight
+                                                className={cn(
+                                                   "absolute right-4 size-4 transition-transform duration-300 group-data-[state=open]:rotate-90",
+                                                   isMobile
+                                                      ? "opacity-100"
+                                                      : isCollapsed
+                                                        ? "opacity-0 w-0"
+                                                        : "opacity-100 transition-opacity delay-200",
+                                                )}
+                                             />
+                                          </span>
+                                       </div>
+                                    </SidebarMenuButton>
+                                 </CollapsibleTrigger>
+
+                                 <CollapsibleContent className='border-l border-gray-400' asChild>
+                                    <SidebarMenuSub>
+                                       {item.children.map((child) => {
+                                          if (isRouteDisabled(user, child, false)) return null;
+
+                                          const isChildDisabled = child.disabled || !child.element;
+
+                                          return (
+                                             <SidebarMenuSubItem key={child.title}>
+                                                <ITooltip
+                                                   label={isChildDisabled ? "Under Development" : ""}
+                                                   placement='right'
+                                                   sideOffset={0}
+                                                   className='w-full!'
+                                                   tooltipClassName='bg-primary'
+                                                >
+                                                   <SidebarMenuButton type='button' className='h-auto' asChild>
+                                                      <div
+                                                         className={cn(
+                                                            "flex items-center gap-2 w-full hover:bg-primary! hover:text-white! transition-all duration-300 text-sm sm:text-base cursor-pointer select-none px-4! py-3!",
+                                                            location.pathname.endsWith(`${item.path}${child.path}`) &&
+                                                               "bg-primary font-semibold text-white!",
+                                                            isChildDisabled &&
+                                                               "opacity-50 hover:bg-transparent! hover:text-black/60!",
+                                                         )}
+                                                         onClick={() =>
+                                                            isChildDisabled ? {} : navigate(`${item.path}${child.path}`)
+                                                         }
+                                                      >
+                                                         {child.icon && (
+                                                            <child.icon className='size-3 sm:size-4 shrink-0' />
+                                                         )}
+
+                                                         <h1
+                                                            className={cn(
+                                                               "text-xs sm:text-sm whitespace-nowrap transition-opacity duration-300 ease-in-out",
+                                                               isMobile
+                                                                  ? "opacity-100"
+                                                                  : isCollapsed
+                                                                    ? "opacity-0 w-0"
+                                                                    : "opacity-100 delay-100",
+                                                            )}
+                                                         >
+                                                            {child.title}
+                                                         </h1>
+                                                      </div>
+                                                   </SidebarMenuButton>
+                                                </ITooltip>
+                                             </SidebarMenuSubItem>
+                                          );
+                                       })}
+                                    </SidebarMenuSub>
+                                 </CollapsibleContent>
+                              </SidebarMenuItem>
+                           </Collapsible>
+                        ) : (
+                           <SidebarMenuItem key={item.title}>
+                              {(() => {
+                                 const isItemDisabled = item.disabled || !item.element;
+
+                                 return (
+                                    <SidebarMenuButton asChild className='h-auto p-0.5!'>
+                                       <ITooltip
+                                          label={isItemDisabled ? "Under Development" : ""}
+                                          placement='right'
+                                          sideOffset={0}
+                                       >
+                                          <div
+                                             onClick={() => (isItemDisabled ? {} : navigate(item.path))}
+                                             className={cn(
+                                                `flex items-center gap-2 sm:gap-3 w-full hover:bg-primary hover:text-white rounded-lg px-1 py-3 transition-all text-sm sm:text-base cursor-pointer select-none`,
+                                                isItemDisabled &&
+                                                   "opacity-50 hover:bg-transparent! hover:text-black/60!",
+                                                location.pathname === item.path && "bg-primary font-semibold",
+                                             )}
+                                          >
+                                             <span
+                                                className={cn(
+                                                   "flex items-center gap-4 mx-1 font-semibold text-sm lg:text-base",
+                                                   location.pathname === item.path && "text-white",
+                                                )}
+                                             >
+                                                <item.icon className='size-5 lg:size-6 ml-1.5' />
+                                                <h1
+                                                   className={cn(
+                                                      "absolute left-12 lg:left-14 text-xs lg:text-base whitespace-nowrap transition-opacity duration-300 ease-in-out",
+                                                      isMobile
+                                                         ? "opacity-100"
+                                                         : isCollapsed
+                                                           ? "opacity-0 w-0"
+                                                           : "opacity-100 delay-100",
+                                                   )}
+                                                >
+                                                   {item.title}
+                                                </h1>
+                                             </span>
+                                          </div>
+                                       </ITooltip>
+                                    </SidebarMenuButton>
+                                 );
+                              })()}
+                           </SidebarMenuItem>
+                        ),
+                     )}
+                  </SidebarMenu>
                </SidebarGroupContent>
             </SidebarGroup>
          </SidebarContent>
-         <SidebarFooter className='bg-sidebar'>
+         <SidebarFooter className='bg-sidebar p-1.5 sm:p-2'>
             <SidebarMenu>
-               <p className='text-gray-400 text-xs'>Development In Progress</p>
+               <p
+                  className={cn(
+                     "text-gray-400 text-[10px] sm:text-xs whitespace-nowrap transition-opacity duration-300 ease-in-out",
+                     isMobile ? "opacity-100" : isCollapsed ? "opacity-0 h-0" : "opacity-100 delay-100",
+                  )}
+               >
+                  Version {import.meta.env.VITE_APP_VERSION}
+               </p>
             </SidebarMenu>
          </SidebarFooter>
       </Sidebar>
-      </TooltipProvider>
    );
 }
