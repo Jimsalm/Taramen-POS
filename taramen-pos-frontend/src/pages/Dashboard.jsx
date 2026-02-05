@@ -1,6 +1,6 @@
 import React from 'react';
 import { AppSidebar } from '../components/custom/AppSidebar';
-import { SidebarProvider } from '../components/ui/sidebar';
+import { SidebarProvider, SidebarTrigger, SidebarInset } from '../components/ui/sidebar';
 import { 
   PlusCircle, FileText, UserPlus, 
   Bell, Search, DollarSign, CreditCard, Tag, UtensilsCrossed, ShoppingCart
@@ -9,16 +9,12 @@ import {
 const Dashboard = () => {
   return (
     <SidebarProvider>
-      <div className="flex h-screen w-screen bg-[#F9FAFB] font-sans text-[#1F2937]">
-        {/* SIDEBAR */}
-        <AppSidebar user={{ username: "Admin", role: "admin" }} />
-      
-      {/* MAIN CONTENT */}
-      <main className="flex-1 flex flex-col overflow-hidden">
-        {/* TOP BAR */}
-        <header className="h-20 bg-white border-b border-gray-200 px-8 flex items-center justify-between">
+      <AppSidebar user={{ username: "Admin", role: "admin" }} />
+      <SidebarInset>
+        <header className="flex h-16 shrink-0 items-center gap-2 border-b bg-white px-8">
+          <SidebarTrigger className="-ml-1" />
           <h2 className="text-2xl font-bold">Dashboard</h2>
-          <div className="flex items-center gap-6">
+          <div className="ml-auto flex items-center gap-6">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
               <input 
@@ -33,10 +29,8 @@ const Dashboard = () => {
             </button>
           </div>
         </header>
-
-        {/* DASHBOARD CONTENT */}
-        <div className="flex-1 overflow-y-auto p-8 space-y-8">
-          
+        
+        <div className="flex-1 overflow-y-auto p-8 space-y-8 bg-[#F9FAFB]">
           {/* 1. STATS CARDS */}
           <div className="grid grid-cols-3 gap-6 w-full">
             <StatCard label="Today's Sales" value="$2,450.00" trend="+15%" icon={DollarSign} />
@@ -82,9 +76,8 @@ const Dashboard = () => {
             </table>
           </section>
         </div>
-      </main>
-    </div>
-  </SidebarProvider>
+      </SidebarInset>
+    </SidebarProvider>
   );
 };
 

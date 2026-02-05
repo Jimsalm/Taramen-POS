@@ -18,7 +18,25 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { MODULES, DASHBOARD } from "@/shared/constants/routes";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "../ui/collapsible";
 import { cn } from "@/shared/lib/utils";
-import { getUserAvailableModules, isRouteDisabled } from "@/shared/helpers/auth";
+// Auth helper functions moved inline to resolve 404 error
+const getUserAvailableModules = (user, allModules = []) => {
+  if (!user || !user.roles) return [];
+  if (!allModules || !allModules.length) return [];
+  if (user.roles.includes('superadmin')) return allModules;
+  
+  return allModules.filter(module => 
+    !module.roles || !module.roles.length || 
+    module.roles.some(role => user.roles.includes(role))
+  );
+};
+
+const isRouteDisabled = (route) => {
+  if (!route) return { status: 'denied', message: 'Route not found' };
+  if (route.status === 'development') {
+    return { status: 'development', message: 'This feature is under development' };
+  }
+  return { status: 'accessible', message: '' };
+};
 import { useEffect, useMemo } from "react";
 import useSidebarStore from "@/store/sidebarStore";
 import ITooltip from "./Tooltip";
