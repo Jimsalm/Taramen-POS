@@ -30,7 +30,6 @@ COPY . .
 COPY --from=vendor /app/vendor ./vendor
 
 # Nginx + Supervisor + start script
-COPY docker/nginx.conf /etc/nginx/nginx.conf
 COPY docker/nginx.conf.template /var/www/html/docker/nginx.conf.template
 COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY docker/start.sh /start.sh
