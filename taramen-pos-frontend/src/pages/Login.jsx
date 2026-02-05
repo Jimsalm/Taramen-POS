@@ -51,7 +51,7 @@ export default function Login() {
                title='Welcome Back'
                description='Enter your credentials to access your account'
                descriptionClassName='text-black text-gray-600 text-md'
-               cardClassName='text-center w-128 bg-white relative overflow-hidden border-1 border-white bg-[linear-gradient(135deg,rgba(255,255,255,0)_0%,rgba(245,171,41,0.25)_100%)] shadow-2xl'
+               cardClassName='text-center w-128 bg-white relative overflow-hidden border-1 border-white shadow-2xl'
                cardContentClassName='pb-12 w-120 mx-auto'
                cardTitleClassName='md:text-4xl text-orange pt-4'
             >               
