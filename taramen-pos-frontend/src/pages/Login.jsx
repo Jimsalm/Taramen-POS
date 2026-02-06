@@ -1,6 +1,5 @@
-import { useState } from "react";
+import { User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { toast } from "sonner";
 import IAlert from "../components/custom/Alert";
 import IButton from "../components/custom/Button";
 import ICard from "../components/custom/Card";
@@ -8,34 +7,25 @@ import Form from "../components/custom/Form";
 import IInput from "../components/custom/Input";
 import LoginLayout from "../layout/LoginLayout";
 import { loginSchema } from "../shared/lib/zod/schema/login";
-import { LockIcon, MailIcon, UtensilsCrossed } from "lucide-react"; 
+import { useLogin } from "../hooks/useAuth";
 
 export default function Login() {
-   const [error, setError] = useState(null);
    const navigate = useNavigate();
+   const { mutate: login, isLoading, error } = useLogin();
 
    const onSubmit = async (data) => {
-      setError(null);
-      const id = toast.loading("Signing you in...");
-
       try {
-         await new Promise(resolve => setTimeout(resolve, 1000));
-         
-         if (!data.username || !data.password) {
-            throw new Error("Please fill in all fields");
-         }
-         
-         const mockToken = "mock-jwt-token";
-         localStorage.setItem("token", mockToken);
-         
-         toast.dismiss(id);
-         toast.success("Login successful!");
-         navigate("/dashboard", { replace: true });
+         login(data, {
+            onSuccess: () => {
+               navigate("/dashboard", { replace: true });
+            },
+            onError: () => {
+            }
+         });
       } catch (error) {
-         toast.dismiss(id);
-         setError(error.message);
       }
    };
+
 
    return (
       <LoginLayout>
@@ -45,35 +35,44 @@ export default function Login() {
                   <img 
                      src="/Taramen.png" 
                      alt="Ta'ramen POS"
-                     className="size-50 w-auto mx-auto block"
+                     className="size-30 w-auto mx-auto block mt-6"
                   />
                }
-               title='Welcome Back!'
+               title='Welcome Back'
                description='Enter your credentials to access your account'
-               descriptionClassName='text-gray-600'
-               cardClassName='text-center w-128 bg-white hover:bg-gray-50 transition-all duration-300 relative overflow-hidden border-0 shadow-2xl shadow-black/60'
-               cardContentClassName='pb-14 w-96 mx-auto'
-               cardTitleClassName='md:text-3xl text-[#FF0605]'
-            >
-               <Form className='flex flex-col gap-6' size- onSubmit={onSubmit} schema={loginSchema}>
-                  <IInput name='username' placeholder='Username' prefix={<MailIcon className='size-4 text-gray-500' />} className='h-12' />
-                  <IInput
-                     name='password'
-                     type='password'
-                     placeholder='Password'
-                     prefix={<LockIcon className='size-4 text-gray-500' />}
-                     className='h-12'
+               descriptionClassName='text-black text-gray-600 text-md'
+               cardClassName='text-center w-128 bg-white relative overflow-hidden border-1 border-white shadow-2xl'
+               cardContentClassName='pb-12 w-120 mx-auto'
+               cardTitleClassName='md:text-4xl text-orange pt-4'
+            >               
+               <Form className='flex flex-col' onSubmit={onSubmit} schema={loginSchema}>
+                  <IInput 
+                     name='username' 
+                     label='Email' 
+                     placeholder='Enter your email' 
+                     labelClassName='font-semibold text-md text-foreground'
+                     className='bg-transparent border border-gray-300 h-12 text-lg! px-4'
+                     wrapperClassName='mb-6'
+                     suffix={<User className="size-4.5 text-gray-500" />}
                   />
-                  <div className='flex justify-end'>
-                     <IButton type='button' variant='ghost' className='text-sm text-[#FF0605] p-0 h-auto'>
-                        Forgot Password?
-                     </IButton>
+                  <div className='relative mb-8'>
+                     <div className='flex justify-between items-center mb-1'>
+                        <div className='font-semibold text-md text-foreground'>Password</div>
+                        <IButton type='button' variant='ghost' className='text-md text-orange hover:text-orange/80 p-0 h-auto font-semibold'>
+                           Forgot password?
+                        </IButton>
+                     </div>
+                     <IInput
+                        name='password'
+                        type='password'
+                        placeholder='Enter your password'
+                        className='bg-transparent border border-gray-300 h-12 text-lg! px-4'
+                     />
                   </div>
-                  <IButton type='submit' variant='destructive' className='w-full'>
-                     Log in
+                  <IButton type='submit' variant='orange' className='w-full font-normal h-12' disabled={isLoading}>
+                     {isLoading ? 'SIGNING IN...' : 'LOGIN'}
                   </IButton>
-
-                  {error && <IAlert description={error} />}
+                  {error && <div className="mt-8"><IAlert description={error.message || error} className="text-sm py-2" /></div>}
                </Form>
             </ICard>
          </section>

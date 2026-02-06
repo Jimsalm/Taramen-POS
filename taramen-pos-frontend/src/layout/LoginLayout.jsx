@@ -5,12 +5,9 @@ export default function LoginLayout({ children }) {
             className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-opacity duration-700"
             style={{ backgroundImage: "url('/background.svg')" }} 
          />
-         <div className="absolute inset-0 bg-black/50" />
-         <div className="relative z-10 min-h-screen w-full flex">
-            <div className="w-1/2"></div>
-            <div className="w-1/2 flex items-center justify-center p-6">
-               {children}
-            </div>
+         <div className="absolute inset-0 bg-black/60" />
+         <div className="relative z-10 min-h-screen w-full flex items-center justify-center p-6">
+            {children}
          </div>
       </div>
    );

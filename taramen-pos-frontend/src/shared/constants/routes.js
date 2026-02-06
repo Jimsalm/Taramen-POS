@@ -1,7 +1,7 @@
 import { Book, Calendar, User2, Warehouse } from "lucide-react";
 
 export const LOGIN = {
-   path: "/",
+   path: "/login",
    title: "Login",
 };
 
