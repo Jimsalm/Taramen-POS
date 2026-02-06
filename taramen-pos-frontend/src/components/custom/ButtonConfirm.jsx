@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Loader2Icon } from "lucide-react";
 import useLoadingStore from "@/store/loadingStore";
-import { cn } from "@/shared/lib/utils";
+import { cn } from "@/lib/utils";
 import { outlineButtonVariant } from "../ui/button-variants";
 import IButton from "./Button";
 

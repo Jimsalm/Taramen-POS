@@ -14,12 +14,18 @@ export default function Login() {
    const { mutate: login, isLoading, error } = useLogin();
 
    const onSubmit = async (data) => {
-      login(data, {
-         onSuccess: () => {
-            navigate("/dashboard", { replace: true });
-         }
-      });
+      try {
+         login(data, {
+            onSuccess: () => {
+               navigate("/dashboard", { replace: true });
+            },
+            onError: () => {
+            }
+         });
+      } catch (error) {
+      }
    };
+
 
    return (
       <LoginLayout>
@@ -49,7 +55,7 @@ export default function Login() {
                      wrapperClassName='mb-6'
                      suffix={<User className="size-4.5 text-gray-500" />}
                   />
-                  <div className='relative mb-12'>
+                  <div className='relative mb-8'>
                      <div className='flex justify-between items-center mb-1'>
                         <div className='font-semibold text-md text-foreground'>Password</div>
                         <IButton type='button' variant='ghost' className='text-md text-orange hover:text-orange/80 p-0 h-auto font-semibold'>
@@ -66,8 +72,7 @@ export default function Login() {
                   <IButton type='submit' variant='orange' className='w-full font-normal h-12' disabled={isLoading}>
                      {isLoading ? 'SIGNING IN...' : 'LOGIN'}
                   </IButton>
-
-                  {error && <IAlert description={error} />}
+                  {error && <div className="mt-8"><IAlert description={error.message || error} className="text-sm py-2" /></div>}
                </Form>
             </ICard>
          </section>

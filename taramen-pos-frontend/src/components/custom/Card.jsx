@@ -1,5 +1,5 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../ui/card";
-import { cn } from "../../shared/lib/utils";
+import { cn } from "../../lib/utils";
 
 export default function ICard({
    children,

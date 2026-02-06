@@ -17,7 +17,7 @@ import {
 import { useNavigate, useLocation } from "react-router-dom";
 import { MODULES, DASHBOARD } from "@/shared/constants/routes";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "../ui/collapsible";
-import { cn } from "@/shared/lib/utils";
+import { cn } from "@/lib/utils";
 // Auth helper functions moved inline to resolve 404 error
 const getUserAvailableModules = (user, allModules = []) => {
   if (!user || !user.roles) return [];
@@ -37,7 +37,7 @@ const isRouteDisabled = (route) => {
   }
   return { status: 'accessible', message: '' };
 };
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import useSidebarStore from "@/store/sidebarStore";
 import ITooltip from "./Tooltip";
 import Title from "./Title";
@@ -46,8 +46,14 @@ import Title from "./Title";
 export function AppSidebar({ user, enableCollapse = true }) {
    const navigate = useNavigate();
    const location = useLocation();
-   const { isHovered, setIsHovered, setIsCollapsed, openItems, setOpenItems, resetOpenItems, isMobile, setIsMobile } =
-      useSidebarStore();
+   const { 
+      isHovered, 
+      setIsHovered, 
+      resetOpenItems, 
+      isCollapsed: isCollapsedState,
+      setCollapsed
+   } = useSidebarStore();
+   const [isMobile, setIsMobile] = useState(false); // Added state variable for isMobile
 
    const { availableModules, isCollapsed } = useMemo(() => {
       const isRouteDashboard = location.pathname === DASHBOARD.path;
@@ -71,9 +77,9 @@ export function AppSidebar({ user, enableCollapse = true }) {
    }, []);
 
    useEffect(() => {
-      setIsCollapsed(isCollapsed && enableCollapse);
+      setCollapsed(isCollapsed && enableCollapse);
       if (isCollapsed) resetOpenItems();
-   }, [isCollapsed, enableCollapse]);
+   }, [isCollapsed, enableCollapse, setCollapsed, resetOpenItems]);
 
    return (
       <Sidebar
@@ -89,7 +95,7 @@ export function AppSidebar({ user, enableCollapse = true }) {
             <SidebarGroup>
                <SidebarGroupContent>
                   <SidebarHeader className='mb-2 flex md:hidden items-center gap-2'>
-                     <img src={BulsuLogo} alt='Bulsu Logo' className='size-12' />
+                     {/* <img src={BulsuLogo} alt='Bulsu Logo' className='size-12' /> */}
                      <header className='flex items-center gap-2'>
                         <Title className={cn("")}>Elib Management System</Title>
                      </header>

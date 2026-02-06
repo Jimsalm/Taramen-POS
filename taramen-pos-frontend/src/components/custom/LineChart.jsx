@@ -1,5 +1,5 @@
 import { CartesianGrid, Line, LineChart, XAxis } from "recharts";
-import { cn } from "@/shared/lib/utils"; // Make sure you have a cn utility
+import { cn } from "@/lib/utils"; // Make sure you have a cn utility
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 

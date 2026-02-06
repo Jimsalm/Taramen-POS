@@ -6,7 +6,7 @@ import { useState } from "react";
 import { EyeClosedIcon, EyeIcon } from "lucide-react";
 import { nestedObjParser } from "../../shared/helpers/parser";
 import { ALPHABETS_ONLY, ALPHANUMERIC_ONLY, NUMERIC_ONLY } from "../../shared/constants/regex";
-import { cn } from "../../shared/lib/utils";
+import { cn } from "../../lib/utils";
 
 export default function IInput({
    name,

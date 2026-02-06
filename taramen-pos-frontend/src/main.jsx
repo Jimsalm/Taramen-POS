@@ -7,7 +7,6 @@ import "./index.css";
 import App from "./App.jsx";
 import { Toaster } from "sonner";
 import { ConfirmationDialog } from "./shared/helpers/confirmAction.jsx";
-import ErrorBoundary from "./components/custom/ErrorBoundary.jsx";
 
 const queryClient = new QueryClient({
   defaultOptions: {

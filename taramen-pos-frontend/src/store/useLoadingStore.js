@@ -2,9 +2,7 @@ import { create } from 'zustand';
 
 const useLoadingStore = create((set) => ({
   isLoading: false,
-  setLoading: (isLoading) => set({ isLoading }),
-  startLoading: () => set({ isLoading: true }),
-  stopLoading: () => set({ isLoading: false })
+  setLoading: (loading) => set({ isLoading: loading }),
 }));
 
 export default useLoadingStore;
