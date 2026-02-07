@@ -68,15 +68,11 @@ class DiscountController extends Controller
     {
         $discount = Discount::findOrFail($id);
         $validated_data = $request->validated();
-        $discount->update($validated_data);
-
-        if (array_key_exists('menu_items_id', $validated_data)) {
-            $discount->menuItems()->sync($validated_data['menu_items_id']);
-        }
+        $updated_discount = $this->discountService->updateDiscount($discount, $validated_data);
 
         return response()->json([
             'message' => 'discount has been updated successfully',
-            'updated_discount' => $validated_data
+            'updated_discount' => $updated_discount
         ],201);
 
     }

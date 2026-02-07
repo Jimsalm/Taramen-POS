@@ -28,11 +28,14 @@ class DiscountService{
     public function getOneDiscount($id){
         return Discount::with('menuItems')->findOrFail($id);
     }
-    public function updateDiscount($request, $id){
-        $discount = Discount::findOrFail($id);
-        $validated_data = $request->validate();
-        $discount->update($validated_data);
-        return [$discount, $validated_data];
+    public function updateDiscount(Discount $discount, array $validatedData){
+        $discount->update($validatedData);
+
+        if (array_key_exists('menu_items_id', $validatedData)) {
+            $discount->menuItems()->sync($validatedData['menu_items_id'] ?? []);
+        }
+
+        return $discount->load('menuItems');
     }
     public function deleteDiscount($id){
         $discount = Discount::findOrFail($id);
