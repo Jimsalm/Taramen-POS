@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Product\MenuItemController;
+use App\Http\Controllers\product\MenuItemController;
 
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('menu-items/{id}/restore', [MenuItemController::class, 'restore'])->name('menu-items.restore');

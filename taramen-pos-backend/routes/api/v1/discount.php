@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\Product\DiscountController;
+use App\Http\Controllers\product\DiscountController;
 use Illuminate\Support\Facades\Route;
 
 // Public Routes

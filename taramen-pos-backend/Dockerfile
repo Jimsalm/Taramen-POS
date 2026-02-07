@@ -1,14 +1,25 @@
-# --- Build stage: install PHP deps with Composer ---
-FROM composer:2 AS vendor
+# --- Build stage: PHP CLI + Composer + extensions ---
+FROM php:8.2-cli-bullseye AS vendor
+
+RUN apt-get update && apt-get install -y git unzip libpq-dev \
+  && docker-php-ext-install pdo_pgsql pgsql \
+  && rm -rf /var/lib/apt/lists/*
+
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /app
+
+# 1) Copy only composer files first (enables caching of composer install)
 COPY composer.json composer.lock ./
-RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader
+
+RUN composer install --no-dev --no-interaction --prefer-dist --optimize-autoloader --no-scripts
+
+# 2) Now copy the rest of the app
+COPY . .
 
 # --- Runtime stage: PHP-FPM + Nginx + Supervisor ---
 FROM php:8.2-fpm-bullseye
 
-# System deps + nginx + supervisor + pgsql extensions
 RUN apt-get update && apt-get install -y \
     nginx supervisor git unzip libpq-dev \
   && docker-php-ext-install pdo_pgsql pgsql \
@@ -16,22 +27,18 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /var/www/html
 
-# Copy app
+# Copy app source
 COPY . .
 
 # Copy vendor from build stage
 COPY --from=vendor /app/vendor ./vendor
 
-# Nginx + Supervisor + start script
-COPY docker/nginx.conf /etc/nginx/nginx.conf
+COPY docker/nginx.conf.template /var/www/html/docker/nginx.conf.template
 COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY docker/start.sh /start.sh
 RUN chmod +x /start.sh
 
-# Ensure Laravel folders are writable
 RUN chown -R www-data:www-data storage bootstrap/cache
 
-# Render provides $PORT; we'll make nginx listen on it via envsubst in start.sh
 ENV PORT=10000
-
 CMD ["/start.sh"]
