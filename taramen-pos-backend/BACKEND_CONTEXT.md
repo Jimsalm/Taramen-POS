@@ -59,6 +59,7 @@ This document summarizes the backend context for the Taramen POS project.
 - `OrderRequest`: filters and order payload
 - `MenuItemRequest`: includes `image` validation
 - `DiscountRequest`: expects `menu_items_id` array for pivot
+ - `ReportRequest`: now allows optional `start_date`/`end_date` (with `end_date` >= `start_date`)
 
 ## Logging
 - Endpoint access logs via dedicated channels in `config/logging.php`
@@ -69,3 +70,6 @@ This document summarizes the backend context for the Taramen POS project.
 ## Notes
 - REST client samples in `REST/*.http`
 - `pos_dev_guide.md` is broader guidance and may not match current code exactly
+ - Controllers now return consistent API envelopes via `App\Http\Responses\ApiResponse`:
+   - `{ success: true|false, message: string, data: any, meta?: object, errors?: object }`
+   - Auth endpoints remain unchanged for token handling
