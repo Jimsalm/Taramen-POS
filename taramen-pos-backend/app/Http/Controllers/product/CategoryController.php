@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Product;
 
 use App\Http\Controllers\Controller;
+use App\Http\Responses\ApiResponse;
 use App\Models\Category;
 use App\Http\Requests\CategoryRequest;
 
@@ -13,7 +14,10 @@ class CategoryController extends Controller
      */
     public function index()
     {
-        return response()->json(Category::all());
+        return ApiResponse::success(
+            Category::all(),
+            'Categories retrieved successfully'
+        );
     }
 
     /**
@@ -22,10 +26,11 @@ class CategoryController extends Controller
     public function store(CategoryRequest $request)
     {
         $category = Category::create($request->validated());
-        return response()->json([
-            'message' => 'Category created successfully',
-            'category' => $category
-        ], 201);
+        return ApiResponse::success(
+            $category,
+            'Category created successfully',
+            201
+        );
     }
 
     /**
@@ -34,10 +39,10 @@ class CategoryController extends Controller
     public function show(string $id)
     {
         $category = Category::findOrFail($id);
-        return response()->json([
-            'message' => 'Category retrieved successfully',
-            'category' => $category
-        ], 200);
+        return ApiResponse::success(
+            $category,
+            'Category retrieved successfully'
+        );
     }
 
     /**
@@ -49,10 +54,10 @@ class CategoryController extends Controller
 
         $category->update($request->validated());
         
-        return response()->json([
-            'message' => 'Category updated successfully',
-            'category' => $category
-        ], 200);
+        return ApiResponse::success(
+            $category,
+            'Category updated successfully'
+        );
     }
 
     /**
@@ -64,9 +69,9 @@ class CategoryController extends Controller
 
         $category->delete();
 
-        return response()->json([
-            'message' => 'Category deleted successfully',
-            'category' => $category
-        ], 200);
+        return ApiResponse::success(
+            $category,
+            'Category deleted successfully'
+        );
     }
 }

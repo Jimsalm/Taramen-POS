@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Product;
 use App\Http\Controllers\Controller;
 use App\Models\MenuItem;
 use App\Http\Requests\MenuItemRequest;
+use App\Http\Responses\ApiResponse;
 use App\Services\MenuItemService;
 
 class MenuItemController extends Controller
@@ -18,7 +19,10 @@ class MenuItemController extends Controller
      */
     public function index()
     {
-        return response()->json(MenuItem::all());
+        return ApiResponse::success(
+            MenuItem::all(),
+            'Menu items retrieved successfully'
+        );
     }
 
     /**
@@ -28,10 +32,11 @@ class MenuItemController extends Controller
     {
         $menuItem = $this->menuItemService->createMenuItem($request->validated(), $request->file('image'));
 
-        return response()->json([
-            'message' => 'Menu item created successfully',
-            'data' => $menuItem
-        ], 201);
+        return ApiResponse::success(
+            $menuItem,
+            'Menu item created successfully',
+            201
+        );
     }
 
     /**
@@ -41,10 +46,10 @@ class MenuItemController extends Controller
     {
         $menuItem = $this->menuItemService->getMenuItem($id);
 
-        return response()->json([
-            'message' => 'Menu item retrieved successfully',
-            'data' => $menuItem
-        ]);
+        return ApiResponse::success(
+            $menuItem,
+            'Menu item retrieved successfully'
+        );
     }
 
     /**
@@ -60,10 +65,10 @@ class MenuItemController extends Controller
             $request->file('image'),
         );
 
-        return response()->json([
-            'message' => 'Menu item updated successfully',
-            'data' => $updateItem
-        ]);
+        return ApiResponse::success(
+            $updateItem,
+            'Menu item updated successfully'
+        );
     }
 
     /**
@@ -75,31 +80,32 @@ class MenuItemController extends Controller
 
         $this->menuItemService->archiveMenuItem($id);
 
-        return response()->json([
-            'message' => 'Menu item archived successfully',
-            'data' => $menuItem
-        ]);
+        return ApiResponse::success(
+            $menuItem,
+            'Menu item archived successfully'
+        );
     }
 
     public function restore($id)
     {
         $this->menuItemService->restoreMenuItem($id);
 
-        return response()->json([
-            'message' => 'Menu item restored successfully'
-        ]);
+        return ApiResponse::success(
+            ['id' => (int) $id],
+            'Menu item restored successfully'
+        );
     }
 
     public function toggleAvailability($id)
     {
         $menuItem = $this->menuItemService->toggleAvailability($id);
 
-        return response()->json([
-            'message' => 'Menu item availability toggled successfully',
-            'data' => [
+        return ApiResponse::success(
+            [
                 'id' => $menuItem->id,
                 'available' => $menuItem->available
-            ]
-        ]);
+            ],
+            'Menu item availability toggled successfully'
+        );
     }
 }
