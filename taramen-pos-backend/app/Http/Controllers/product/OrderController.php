@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Services\OrderService;
 use Illuminate\Http\Request;
 use App\Http\Requests\OrderRequest;
+use App\Http\Responses\ApiResponse;
 
 class OrderController extends Controller
 {
@@ -20,10 +21,10 @@ class OrderController extends Controller
         $perPage = $request->input('per_page', 10);
         $orders = $this->orderService->getFilteredOrders($filter, $perPage);
 
-        return response()->json([
-            'message' => 'Orders retrieved successfully',
-            'data' => $orders
-        ], 200);
+        return ApiResponse::success(
+            $orders,
+            'Orders retrieved successfully'
+        );
     }
   
     public function store(OrderRequest $request)
@@ -31,15 +32,17 @@ class OrderController extends Controller
         try {
             $order = $this->orderService->createOrder($request);
 
-            return response()->json([
-                'message' => 'Order created successfully',
-                'data' => $order
-            ], 201);
+            return ApiResponse::success(
+                $order,
+                'Order created successfully',
+                201
+            );
         } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Failed to create order',
-                'error' => $e->getMessage()
-            ], 500);
+            return ApiResponse::error(
+                'Failed to create order',
+                500,
+                ['error' => $e->getMessage()]
+            );
         }
     }
 
@@ -49,15 +52,16 @@ class OrderController extends Controller
         try {
             $order = $this->orderService->getOrder($id);
 
-            return response()->json([
-                'message' => 'Order retrieved successfully',
-                'data' => $order
-            ], 200);
+            return ApiResponse::success(
+                $order,
+                'Order retrieved successfully'
+            );
         } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Failed to retrieve order',
-                'error' => $e->getMessage()
-            ], 500);
+            return ApiResponse::error(
+                'Failed to retrieve order',
+                500,
+                ['error' => $e->getMessage()]
+            );
         }
     }
     
@@ -66,15 +70,16 @@ class OrderController extends Controller
         try {
             $order = $this->orderService->updateOrder($id, $request);
 
-            return response()->json([
-                'message' => 'Order updated successfully',
-                'data' => $order
-            ], 200);
+            return ApiResponse::success(
+                $order,
+                'Order updated successfully'
+            );
         } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Failed to update order',
-                'error' => $e->getMessage()
-            ], 500);
+            return ApiResponse::error(
+                'Failed to update order',
+                500,
+                ['error' => $e->getMessage()]
+            );
         }
     }
 
@@ -83,15 +88,16 @@ class OrderController extends Controller
         try {
             $order = $this->orderService->updateOrderStatus($id, $request->status);
 
-            return response()->json([
-                'message' => 'Order status updated successfully',
-                'data' => $order
-            ], 200);
+            return ApiResponse::success(
+                $order,
+                'Order status updated successfully'
+            );
         } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Failed to update order status',
-                'error' => $e->getMessage()
-            ], 500);
+            return ApiResponse::error(
+                'Failed to update order status',
+                500,
+                ['error' => $e->getMessage()]
+            );
         }
     }
 
@@ -101,15 +107,16 @@ class OrderController extends Controller
         try {
             $order = $this->orderService->deleteOrder($id);
 
-            return response()->json([
-                'message' => 'Order deleted successfully',
-                'data' => $order
-            ], 200);
+            return ApiResponse::success(
+                $order,
+                'Order deleted successfully'
+            );
         } catch (\Exception $e) {
-            return response()->json([
-                'message' => 'Failed to delete order',
-                'error' => $e->getMessage()
-            ], 500);
+            return ApiResponse::error(
+                'Failed to delete order',
+                500,
+                ['error' => $e->getMessage()]
+            );
         }
     }
 
@@ -119,9 +126,9 @@ class OrderController extends Controller
 
         $stats = $this->orderService->getOrderStats($filter);
 
-        return response()->json([
-            'message' => 'Order stats retrieved successfully',
-            'data' => $stats
-        ], 200);
+        return ApiResponse::success(
+            $stats,
+            'Order stats retrieved successfully'
+        );
     }
 }

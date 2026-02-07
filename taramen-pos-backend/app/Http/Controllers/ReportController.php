@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Http\Requests\ReportRequest;
 use App\Services\ReportService;
+use App\Http\Responses\ApiResponse;
 
 class ReportController extends Controller
 {
@@ -25,12 +26,14 @@ class ReportController extends Controller
 
         $top_item =$this->reportService->topItemService($start, $end);
 
-        return response()->json([
-            'success' => true,
-            'total_sales' => $summary,
-            'employees' => $per_employee_sales,
-            '$top_item' => $top_item
-        ]);
+        return ApiResponse::success(
+            [
+                'total_sales' => $summary,
+                'employees' => $per_employee_sales,
+                'top_item' => $top_item,
+            ],
+            'Report summary retrieved successfully'
+        );
 
     }
 
