@@ -29,7 +29,7 @@ class ReportController extends Controller
             'success' => true,
             'total_sales' => $summary,
             'employees' => $per_employee_sales,
-            '$top_item' => $top_item
+            'top_item' => $top_item
         ]);
 
     }
