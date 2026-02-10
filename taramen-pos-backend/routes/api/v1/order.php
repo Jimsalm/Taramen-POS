@@ -5,6 +5,8 @@ use App\Http\Controllers\product\OrderController;
 
 Route::middleware(['auth:sanctum'])->group(function () {
 
+    Route::get('orders/{id}/receipt', [OrderController::class, 'receipt']);
+
     Route::get('orders/stats', [OrderController::class, 'stats']);
 
     Route::patch('orders/{id}/status', [OrderController::class, 'updateStatus']);
