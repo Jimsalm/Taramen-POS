@@ -1,6 +1,5 @@
-import { User } from "lucide-react";
+import { User, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import IAlert from "../components/custom/Alert";
 import IButton from "../components/custom/Button";
 import ICard from "../components/custom/Card";
 import Form from "../components/custom/Form";
@@ -8,24 +7,31 @@ import IInput from "../components/custom/Input";
 import LoginLayout from "../layout/LoginLayout";
 import { loginSchema } from "../shared/lib/zod/schema/login";
 import { useLogin } from "../hooks/useAuth";
+import useAuthStore from "../stores/useAuthStore";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../components/ui/dialog";
+import IAlert from "../components/custom/Alert";
 
 export default function Login() {
    const navigate = useNavigate();
-   const { mutate: login, isLoading, error } = useLogin();
+   const { 
+      isLoading,
+      errorMessage,
+      clearError,
+      openForgotPasswordModal,
+      isForgotPasswordModalOpen,
+      closeForgotPasswordModal
+   } = useAuthStore();
+
+   const { mutate: login } = useLogin();
 
    const onSubmit = async (data) => {
-      try {
-         login(data, {
-            onSuccess: () => {
-               navigate("/dashboard", { replace: true });
-            },
-            onError: () => {
-            }
-         });
-      } catch (error) {
-      }
+      clearError(); // Clear any previous errors
+      login(data, {
+         onSuccess: () => {
+            navigate("/dashboard", { replace: true });
+         }
+      });
    };
-
 
    return (
       <LoginLayout>
@@ -47,7 +53,8 @@ export default function Login() {
             >               
                <Form className='flex flex-col' onSubmit={onSubmit} schema={loginSchema}>
                   <IInput 
-                     name='username' 
+                     name='email' 
+                     type='email'
                      label='Email' 
                      placeholder='Enter your email' 
                      labelClassName='font-semibold text-md text-foreground'
@@ -58,7 +65,12 @@ export default function Login() {
                   <div className='relative mb-8'>
                      <div className='flex justify-between items-center mb-1'>
                         <div className='font-semibold text-md text-foreground'>Password</div>
-                        <IButton type='button' variant='ghost' className='text-md text-orange hover:text-orange/80 p-0 h-auto font-semibold'>
+                        <IButton 
+                           type='button' 
+                           variant='ghost' 
+                           className='text-md text-orange hover:text-orange/80 p-0 h-auto font-semibold'
+                           onClick={openForgotPasswordModal}
+                        >
                            Forgot password?
                         </IButton>
                      </div>
@@ -69,13 +81,49 @@ export default function Login() {
                         className='bg-transparent border border-gray-300 h-12 text-lg! px-4'
                      />
                   </div>
-                  <IButton type='submit' variant='orange' className='w-full font-normal h-12' disabled={isLoading}>
-                     {isLoading ? 'SIGNING IN...' : 'LOGIN'}
+                  <IButton 
+                     type='submit' 
+                     variant='orange' 
+                     className='w-full font-normal h-12 flex items-center justify-center gap-2' 
+                     disabled={isLoading}
+                  >
+                     {isLoading ? (
+                        <>
+                           <Loader2 className="h-4 w-4 animate-spin" />
+                           SIGNING IN...
+                        </>
+                     ) : 'LOGIN'}
                   </IButton>
-                  {error && <div className="mt-8"><IAlert description={error.message || error} className="text-sm py-2" /></div>}
+                  {errorMessage && (
+                     <div className="mt-8">
+                        <IAlert variant="destructive" description={errorMessage} />
+                     </div>
+                  )}
                </Form>
             </ICard>
          </section>
+
+         <Dialog 
+            open={isForgotPasswordModalOpen} 
+            onOpenChange={(open) => !open && closeForgotPasswordModal()}
+         >
+            <DialogContent>
+               <DialogHeader>
+                  <DialogTitle>Forgot Password</DialogTitle>
+               </DialogHeader>
+               <p className="text-sm text-gray-600 mb-4">
+                  Please contact the administrator to reset your password.
+               </p>
+               <div className="flex justify-end gap-2">
+                  <IButton 
+                     onClick={closeForgotPasswordModal}
+                     variant="outline"
+                  >
+                     Close
+                  </IButton>
+               </div>
+            </DialogContent>
+         </Dialog>
       </LoginLayout>
    );
 }
