@@ -43,6 +43,6 @@ export const useLogout = () => {
   return () => {
     localStorage.removeItem("auth_token");
     localStorage.removeItem("auth_user");
-    window.location.href = "/login"; // Force clear state via reload
+    window.location.href = "/login"; 
   };
 };
