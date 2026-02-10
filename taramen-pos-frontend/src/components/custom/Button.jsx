@@ -1,4 +1,4 @@
-import useLoadingStore from "@/store/useLoadingStore";
+import useLoadingStore from "@/stores/useLoadingStore";
 import { Button } from "../ui/button";
 import { Loader2Icon } from "lucide-react";
 
