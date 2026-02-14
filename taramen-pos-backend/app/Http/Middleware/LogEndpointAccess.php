@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\EndpointLog;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -21,7 +22,7 @@ class LogEndpointAccess
         try {
             $response = $next($request);
         } catch (\Throwable $e) {
-            $this->logRequest($request, 500, microtime(true) - $startTime);
+            $this->logRequest($request, 500, microtime(true) - $startTime, $e->getMessage());
             throw $e;
         }
         
@@ -32,9 +33,10 @@ class LogEndpointAccess
         return $response;
     }
     
-    private function logRequest(Request $request, int $statusCode, float $duration): void
+    private function logRequest(Request $request, int $statusCode, float $duration, ?string $errorMessage = null): void
     {
         $isSuccessful = $statusCode >= 200 && $statusCode < 400;
+        $durationMs = round($duration * 1000, 2);
         
         $logData = [
             'timestamp' => now()->toDateTimeString(),
@@ -45,13 +47,45 @@ class LogEndpointAccess
             'ip_address' => $request->ip(),
             'user_id' => auth()->id(),
             'user_agent' => $request->userAgent(),
-            'duration' => round($duration * 1000, 2) . 'ms',
+            'duration' => $durationMs . 'ms',
+            'duration_ms' => $durationMs,
+            'error_message' => $errorMessage,
         ];
         
         if ($isSuccessful) {
             Log::channel('endpoint_success')->info('Successful endpoint access', $logData);
         } else {
             Log::channel('endpoint_failure')->warning('Failed endpoint access', $logData);
+        }
+
+        $this->storeDatabaseLog($logData, $isSuccessful);
+    }
+
+    private function storeDatabaseLog(array $logData, bool $isSuccessful): void
+    {
+        try {
+            EndpointLog::create([
+                'method' => $logData['method'],
+                'endpoint' => $logData['endpoint'],
+                'path' => $logData['path'],
+                'status_code' => $logData['status_code'],
+                'is_success' => $isSuccessful,
+                'ip_address' => $logData['ip_address'],
+                'user_id' => $logData['user_id'],
+                'user_agent' => $logData['user_agent'],
+                'duration_ms' => $logData['duration_ms'],
+                'error_message' => $logData['error_message'],
+            ]);
+        } catch (\Throwable $e) {
+            Log::channel('endpoint_failure')->warning(
+                'Failed to save endpoint log to database',
+                [
+                    'method' => $logData['method'],
+                    'endpoint' => $logData['endpoint'],
+                    'status_code' => $logData['status_code'],
+                    'reason' => $e->getMessage(),
+                ]
+            );
         }
     }
 }
