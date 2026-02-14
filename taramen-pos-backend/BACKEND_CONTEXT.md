@@ -17,6 +17,7 @@ This document summarizes the backend context for the Taramen POS project.
 - `POST /api/v1/logout`
 - `GET /api/v1/user`
 - Token issuance in `App\Services\AuthService`
+- Sanctum token expiry configured in `config/sanctum.php` via `SANCTUM_EXPIRATION` (default `720` minutes / 12 hours)
 - Validation in `App\Http\Requests\AuthRequest`
 - Default admin: `admin@taramen.com` / `password123` (seeded by `UserSeeder`)
 
@@ -63,6 +64,13 @@ This document summarizes the backend context for the Taramen POS project.
 
 ## Logging
 - Endpoint access logs via dedicated channels in `config/logging.php`
+- Endpoint access logs are also persisted to `endpoint_logs` via `App\Http\Middleware\LogEndpointAccess`
+- DB log schema migration: `database/migrations/2026_02_14_000000_create_endpoint_logs_table.php`
+
+## Exception Handling
+- API requests (`/api/*`) are forced to JSON responses in `bootstrap/app.php`
+- Unauthenticated API access returns standardized `401 Unauthorized` response via `ApiResponse::error(...)`
+- Unauthorized API actions return standardized `403 Forbidden` response via `ApiResponse::error(...)`
 
 ## Seed Data
 - `DatabaseSeeder` runs `UserSeeder`, `CategorySeeder`, `MenuItemSeeder`
