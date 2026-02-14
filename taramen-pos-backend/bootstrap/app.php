@@ -1,8 +1,12 @@
 <?php
 
+use App\Http\Responses\ApiResponse;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Request;
 use App\Http\Middleware\LogEndpointAccess;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -16,5 +20,31 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->append(LogEndpointAccess::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->shouldRenderJsonWhen(function (Request $request): bool {
+            return $request->is('api/*') || $request->expectsJson();
+        });
+
+        $exceptions->render(function (AuthenticationException $e, Request $request) {
+            if (! $request->is('api/*')) {
+                return null;
+            }
+
+            return ApiResponse::error(
+                'Unauthorized',
+                401,
+                ['auth' => ['Missing, invalid, or expired access token.']]
+            );
+        });
+
+        $exceptions->render(function (AuthorizationException $e, Request $request) {
+            if (! $request->is('api/*')) {
+                return null;
+            }
+
+            return ApiResponse::error(
+                'Forbidden',
+                403,
+                ['auth' => ['You do not have permission to perform this action.']]
+            );
+        });
     })->create();
