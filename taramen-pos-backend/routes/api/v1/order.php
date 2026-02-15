@@ -7,7 +7,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::get('orders/stats', [OrderController::class, 'stats']);
 
-    Route::patch('orders/{id}/status', [OrderController::class, 'updateStatus']);
+    Route::patch('orders/{id}/status', [OrderController::class, 'updateStatus'])
+        ->name('orders.updateStatus');
 
     Route::apiResource('orders', OrderController::class);
 });
