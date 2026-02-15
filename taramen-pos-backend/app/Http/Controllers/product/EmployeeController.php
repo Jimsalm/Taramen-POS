@@ -7,6 +7,7 @@ use App\Services\EmployeeService;
 use App\Http\Requests\EmployeeRequest;
 use App\Models\Employee;
 use App\Http\Responses\ApiResponse;
+use Illuminate\Support\Facades\Log;
 
 
 class EmployeeController extends Controller
@@ -79,10 +80,15 @@ class EmployeeController extends Controller
                 'Employee deleted successfully'
             );
         } catch (\Exception $e) {
+            Log::error('Failed to delete employee', [
+                'action' => 'employees.destroy',
+                'employee_id' => $id,
+                'error' => $e->getMessage(),
+            ]);
+
             return ApiResponse::error(
                 'Failed to delete employee',
-                500,
-                ['error' => $e->getMessage()]
+                500
             );
         }
     }
