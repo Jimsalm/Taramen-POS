@@ -24,6 +24,8 @@ class CategoryRequest extends FormRequest
     {
         $rules = [
             'description' => 'nullable|string',
+            'status' => ['sometimes', 'boolean'],
+            'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,svg,webp', 'max:2048'],
         ];
 
         if ($this->routeIs('categories.store')) {
