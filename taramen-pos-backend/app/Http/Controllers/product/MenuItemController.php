@@ -103,6 +103,7 @@ class MenuItemController extends Controller
         return ApiResponse::success(
             [
                 'id' => $menuItem->id,
+                'status' => $menuItem->status,
                 'available' => $menuItem->available
             ],
             'Menu item availability toggled successfully'
