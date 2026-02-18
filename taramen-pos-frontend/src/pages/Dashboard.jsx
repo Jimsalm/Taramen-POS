@@ -1,12 +1,11 @@
-import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar';
+import PosLayout from "@/layout/PosLayout";
 
 const Dashboard = () => {
   return (
-    <SidebarProvider>
-      <SidebarInset>
-       <h1>hatdog</h1>
-      </SidebarInset>
-    </SidebarProvider>
+    <PosLayout
+      title="Dashboard"
+      description="Choose a section from the sidebar to get started."
+    />
   );
 };
 
