@@ -7,6 +7,7 @@ use App\Services\OrderService;
 use Illuminate\Http\Request;
 use App\Http\Requests\OrderRequest;
 use App\Http\Responses\ApiResponse;
+use Illuminate\Support\Facades\Log;
 
 class OrderController extends Controller
 {
@@ -38,11 +39,9 @@ class OrderController extends Controller
                 201
             );
         } catch (\Exception $e) {
-            return ApiResponse::error(
-                'Failed to create order',
-                500,
-                ['error' => $e->getMessage()]
-            );
+            return $this->internalErrorResponse('Failed to create order', $e, [
+                'action' => 'orders.store',
+            ]);
         }
     }
 
@@ -57,11 +56,10 @@ class OrderController extends Controller
                 'Order retrieved successfully'
             );
         } catch (\Exception $e) {
-            return ApiResponse::error(
-                'Failed to retrieve order',
-                500,
-                ['error' => $e->getMessage()]
-            );
+            return $this->internalErrorResponse('Failed to retrieve order', $e, [
+                'action' => 'orders.show',
+                'order_id' => $id,
+            ]);
         }
     }
 
@@ -93,11 +91,10 @@ class OrderController extends Controller
                 'Order updated successfully'
             );
         } catch (\Exception $e) {
-            return ApiResponse::error(
-                'Failed to update order',
-                500,
-                ['error' => $e->getMessage()]
-            );
+            return $this->internalErrorResponse('Failed to update order', $e, [
+                'action' => 'orders.update',
+                'order_id' => $id,
+            ]);
         }
     }
 
@@ -111,11 +108,10 @@ class OrderController extends Controller
                 'Order status updated successfully'
             );
         } catch (\Exception $e) {
-            return ApiResponse::error(
-                'Failed to update order status',
-                500,
-                ['error' => $e->getMessage()]
-            );
+            return $this->internalErrorResponse('Failed to update order status', $e, [
+                'action' => 'orders.updateStatus',
+                'order_id' => $id,
+            ]);
         }
     }
 
@@ -130,11 +126,10 @@ class OrderController extends Controller
                 'Order deleted successfully'
             );
         } catch (\Exception $e) {
-            return ApiResponse::error(
-                'Failed to delete order',
-                500,
-                ['error' => $e->getMessage()]
-            );
+            return $this->internalErrorResponse('Failed to delete order', $e, [
+                'action' => 'orders.destroy',
+                'order_id' => $id,
+            ]);
         }
     }
 
@@ -148,5 +143,14 @@ class OrderController extends Controller
             $stats,
             'Order stats retrieved successfully'
         );
+    }
+
+    private function internalErrorResponse(string $message, \Throwable $exception, array $context = [])
+    {
+        Log::error($message, array_merge($context, [
+            'error' => $exception->getMessage(),
+        ]));
+
+        return ApiResponse::error($message, 500);
     }
 }

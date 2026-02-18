@@ -17,6 +17,8 @@ This document summarizes the backend context for the Taramen POS project.
 - `POST /api/v1/logout`
 - `GET /api/v1/user`
 - Token issuance in `App\Services\AuthService`
+- Sanctum token expiry configured in `config/sanctum.php` via `SANCTUM_EXPIRATION` (default `720` minutes / 12 hours)
+- Auth controller now returns standardized API envelopes via `App\Http\Responses\ApiResponse`
 - Validation in `App\Http\Requests\AuthRequest`
 - Default admin: `admin@taramen.com` / `password123` (seeded by `UserSeeder`)
 
@@ -57,12 +59,25 @@ This document summarizes the backend context for the Taramen POS project.
 ## Validation
 - Requests live in `app/Http/Requests`
 - `OrderRequest`: filters and order payload
+- Status update route is named `orders.updateStatus` and used by `OrderRequest` route-based validation
 - `MenuItemRequest`: includes `image` validation
 - `DiscountRequest`: expects `menu_items_id` array for pivot
  - `ReportRequest`: now allows optional `start_date`/`end_date` (with `end_date` >= `start_date`)
 
 ## Logging
 - Endpoint access logs via dedicated channels in `config/logging.php`
+- Endpoint access logs are also persisted to `endpoint_logs` via `App\Http\Middleware\LogEndpointAccess`
+- DB log schema migration: `database/migrations/2026_02_14_000000_create_endpoint_logs_table.php`
+- Endpoint log retention is scheduled in `routes/console.php` and controlled by `ENDPOINT_LOG_RETENTION_DAYS` (default in `.env.example`: `30`)
+
+## Scheduled Maintenance
+- `sanctum:prune-expired --hours=24` runs daily (configured in `routes/console.php`)
+- Endpoint logs older than retention window are deleted daily via `Schedule::call(...)` in `routes/console.php`
+
+## Exception Handling
+- API requests (`/api/*`) are forced to JSON responses in `bootstrap/app.php`
+- Unauthenticated API access returns standardized `401 Unauthorized` response via `ApiResponse::error(...)`
+- Unauthorized API actions return standardized `403 Forbidden` response via `ApiResponse::error(...)`
 
 ## Seed Data
 - `DatabaseSeeder` runs `UserSeeder`, `CategorySeeder`, `MenuItemSeeder`
@@ -72,4 +87,4 @@ This document summarizes the backend context for the Taramen POS project.
 - `pos_dev_guide.md` is broader guidance and may not match current code exactly
  - Controllers now return consistent API envelopes via `App\Http\Responses\ApiResponse`:
    - `{ success: true|false, message: string, data: any, meta?: object, errors?: object }`
-   - Auth endpoints remain unchanged for token handling
+  - Order/employee error responses now avoid exposing raw exception messages to clients and log details server-side
