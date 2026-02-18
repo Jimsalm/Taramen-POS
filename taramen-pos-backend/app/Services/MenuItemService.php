@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Storage;
 class MenuItemService {
 
     public function createMenuItem(array $data, ?UploadedFile $image = null){
+        $data = $this->normalizeStatusFields($data);
         
         if ($image){
             $data['image'] = $image->store('menu_items', 'public');
@@ -24,6 +25,7 @@ class MenuItemService {
     }
 
     public function updateMenuItem(MenuItem $menuItem, array $data, ?UploadedFile $image = null){
+        $data = $this->normalizeStatusFields($data);
         
         if ($image){
             if($menuItem->image) {
@@ -43,6 +45,7 @@ class MenuItemService {
         $menuItem->delete();
 
         $menuItem->update([
+            'status' => false,
             'available' => false
         ]);
     }
@@ -53,6 +56,7 @@ class MenuItemService {
         $menuItem->restore();
 
         $menuItem->update([
+            'status' => true,
             'available' => true
         ]);
     }
@@ -60,9 +64,21 @@ class MenuItemService {
     public function toggleAvailability($id){
         $menuItem = MenuItem::withTrashed()->findOrFail($id);
         $menuItem->available = !$menuItem->available;
+        $menuItem->status = $menuItem->available;
         $menuItem->save();
 
         return $menuItem;
+    }
+
+    private function normalizeStatusFields(array $data): array
+    {
+        if (array_key_exists('status', $data)) {
+            $data['available'] = (bool) $data['status'];
+        } elseif (array_key_exists('available', $data)) {
+            $data['status'] = (bool) $data['available'];
+        }
+
+        return $data;
     }
     
 }
