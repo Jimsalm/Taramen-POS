@@ -62,6 +62,24 @@ class OrderController extends Controller
             ]);
         }
     }
+
+    public function receipt($id)
+    {
+        try {
+            $receipt = $this->orderService->getReceipt($id);
+
+            return ApiResponse::success(
+                $receipt,
+                'Receipt retrieved successfully'
+            );
+        } catch (\Exception $e) {
+            return ApiResponse::error(
+                'Failed to retrieve receipt',
+                500,
+                ['error' => $e->getMessage()]
+            );
+        }
+    }
     
     public function update(OrderRequest $request, $id)
     {
