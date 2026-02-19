@@ -25,6 +25,16 @@ class MenuItemController extends Controller
         );
     }
 
+    public function available()
+    {
+        $menuItems = $this->menuItemService->getAvailableMenuItems();
+
+        return ApiResponse::success(
+            $menuItems,
+            'Available menu items retrieved successfully'
+        );
+    }
+
     /**
      * Store a newly created resource in storage.
      */

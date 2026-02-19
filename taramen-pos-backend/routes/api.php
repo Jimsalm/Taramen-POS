@@ -28,5 +28,6 @@ Route::prefix('v1')
         require __DIR__ . '/api/v1/menu_item.php';
         require __DIR__ . '/api/v1/employee.php';
         require __DIR__ . '/api/v1/report.php';
+        require __DIR__ . '/api/v1/discount_type.php';
     });
 });
