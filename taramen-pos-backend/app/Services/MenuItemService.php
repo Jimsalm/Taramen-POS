@@ -8,6 +8,10 @@ use Illuminate\Support\Facades\Storage;
 
 class MenuItemService {
 
+    public function getAvailableMenuItems(){
+        return MenuItem::where('available', true)->get();
+    }
+
     public function createMenuItem(array $data, ?UploadedFile $image = null){
         
         if ($image){
