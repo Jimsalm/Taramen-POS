@@ -2,18 +2,24 @@
 
 namespace App\Services;
 
+use App\Models\FilesUpload;
 use App\Models\MenuItem;
+use Carbon\Carbon;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class MenuItemService {
 
     public function getAvailableMenuItems(){
-        return MenuItem::with(['category', 'bundleComponents.category'])
+        $menuItems = MenuItem::with(['category', 'bundleComponents.category', 'fileUpload'])
             ->where('available', true)
             ->get();
+
+        return $menuItems->map(fn (MenuItem $menuItem) => $this->attachTemporaryImageUrl($menuItem));
     }
 
     public function createMenuItem(array $data, ?UploadedFile $image = null){
@@ -22,32 +28,43 @@ class MenuItemService {
             unset($data['components']);
 
             $data['is_bundle'] = (bool) ($data['is_bundle'] ?? false);
+            $data = $this->normalizeStatusFields($data);
 
             if ($image){
-                $data['image'] = $image->store('menu_items', 'public');
+                $current_year = Carbon::now()->format('Y');
+                $uuid = (string) Str::uuid();
+                $extension = $image->getClientOriginalExtension();
+                $storage_filename = $uuid;
+                $original_filename = $image->getClientOriginalName();
+                $path = $image->storeAs("menu_items/{$current_year}", "{$storage_filename}.{$extension}", 'public');
+                $file_uploaded =FilesUpload::create([
+                   "storage_filename" => $storage_filename,
+                   "original_name" => $original_filename,
+                   "extension" => $extension,
+                    "file_path" => $path
+                ]);
+                $data['image_id'] = $file_uploaded->id;
             }
-        $data = $this->normalizeStatusFields($data);
-        
-        if ($image){
-            $data['image'] = $image->store('menu_items', 'public');
-        }
 
             $menuItem = MenuItem::create($data);
 
             if ($menuItem->is_bundle) {
+
                 $this->syncBundleComponents($menuItem, $components);
             }
 
-            return $menuItem->fresh(['category', 'bundleComponents.category']);
+            $menuItem = $menuItem->fresh(['category', 'bundleComponents.category', 'fileUpload']);
+
+            return $this->attachTemporaryImageUrl($menuItem);
         });
     }
 
     public function getMenuItem($id){
         $menuItem = MenuItem::withTrashed()
-            ->with(['category', 'bundleComponents.category'])
+            ->with(['category', 'bundleComponents.category', 'fileUpload'])
             ->findOrFail($id);
 
-        return $menuItem;
+        return $this->attachTemporaryImageUrl($menuItem);
     }
 
     public function updateMenuItem(MenuItem $menuItem, array $data, ?UploadedFile $image = null){
@@ -55,19 +72,29 @@ class MenuItemService {
             $hasComponents = array_key_exists('components', $data);
             $components = $data['components'] ?? [];
             unset($data['components']);
+            $data = $this->normalizeStatusFields($data);
 
             if ($image){
-                if($menuItem->image) {
-                    Storage::disk('public')->delete($menuItem->image);
+                if ($menuItem->fileUpload?->file_path) {
+                    Storage::disk('public')->delete($menuItem->fileUpload->file_path);
                 }
-                $data['image'] = $image->store('menu_items', 'public');
-        $data = $this->normalizeStatusFields($data);
-        
-        if ($image){
-            if($menuItem->image) {
-                Storage::disk('public')->delete($menuItem->image);
-            }
 
+                $current_year = Carbon::now()->format('Y');
+                $uuid = (string) Str::uuid();
+                $extension = $image->getClientOriginalExtension();
+                $storage_filename = $uuid;
+                $original_filename = $image->getClientOriginalName();
+                $path = $image->storeAs("menu_items/{$current_year}", $storage_filename . '.' . $extension, 'public');
+
+                $file_uploaded = FilesUpload::create([
+                    "storage_filename" => $storage_filename,
+                    "original_name" => $original_filename,
+                    "extension" => $extension,
+                    "file_path" => $path
+                ]);
+
+                $data['image_id'] = $file_uploaded->id;
+            }
             $willBeBundle = array_key_exists('is_bundle', $data)
                 ? (bool) $data['is_bundle']
                 : (bool) $menuItem->is_bundle;
@@ -86,7 +113,9 @@ class MenuItemService {
                 $this->syncBundleComponents($menuItem, $components);
             }
 
-            return $menuItem->fresh(['category', 'bundleComponents.category']);
+            $menuItem = $menuItem->fresh(['category', 'bundleComponents.category', 'fileUpload']);
+
+            return $this->attachTemporaryImageUrl($menuItem);
         });
     }
 
@@ -167,5 +196,24 @@ class MenuItemService {
 
         return $data;
     }
-    
+
+    private function attachTemporaryImageUrl(MenuItem $menuItem, int $expiresInMinutes = 15): MenuItem
+    {
+        $storageFilename = $menuItem->fileUpload?->storage_filename;
+
+        if (!$storageFilename) {
+            $menuItem->setAttribute('image_url', null);
+            return $menuItem;
+        }
+
+        $signedUrl = URL::temporarySignedRoute(
+            'secure.menu.image.signed',
+            now()->addMinutes($expiresInMinutes),
+            ['storage_filename' => $storageFilename]
+        );
+
+        $menuItem->setAttribute('image_url', $signedUrl);
+
+        return $menuItem;
+    }
 }

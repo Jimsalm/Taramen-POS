@@ -19,7 +19,7 @@ class MenuItem extends Model
         'status',
         'available',
         'is_bundle',
-        'image',
+        'image_id',
     ];
 
     protected $casts = [
@@ -37,6 +37,10 @@ class MenuItem extends Model
     public function discount(): BelongsToMany
     {
         return $this->belongsToMany(Discount::class, 'discount_items');
+    }
+
+    public function fileUpload() {
+        return $this->belongsTo(FilesUpload::class, "image_id", "id");
     }
 
     public function bundleComponents(): BelongsToMany
