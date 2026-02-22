@@ -11,24 +11,23 @@ use App\Services\DiscountTypeService;
 
 class DiscountTypeController extends Controller
 {
-    private DiscountTypeService $discountTypeService;
 
-    public function __construct(DiscountTypeService $discountTypeService){
+
+    public function __construct(protected DiscountTypeService $discountTypeService){
         $this->discountTypeService = $discountTypeService;
-    }    
+    }
 
     public function getDiscountTypes(){
 
         try{
-            
+
             $discountTypes = $this->discountTypeService->getDiscountTypes();
-            ApiResponse::success(
+            return ApiResponse::success(
                 $discountTypes,
                 'Discount types fetched successfully',
-    
             );
         }catch(\Exception $e){
-            ApiResponse::error(
+            return ApiResponse::error(
                 'Failed to get discount types', 500
             );
         }
@@ -38,13 +37,13 @@ class DiscountTypeController extends Controller
     public function createDiscountTypes(DiscountTypeRequest $request){
         try{
             $discountType = $this->discountTypeService->createDiscountType($request);
-            
-            ApiResponse::success(
+
+           return ApiResponse::success(
                 $discountType,
                 'Discount type created successfully',
             );
         }catch(\Exception $e){
-            ApiResponse::error(
+          return  ApiResponse::error(
                 'Failed to create discount type', 500
             );
         }
@@ -55,14 +54,14 @@ class DiscountTypeController extends Controller
         try{
 
             $discountType = $this->discountTypeService->updateDiscountType($request, $id);
-    
-    
-            ApiResponse::success(
+
+
+           return ApiResponse::success(
                 $discountType,
                 'Discount type updated successfully',
             );
         }catch(\Exception $e){
-            ApiResponse::error(
+           return ApiResponse::error(
                 'Failed to update discount type', 500
             );
         }
@@ -72,13 +71,13 @@ class DiscountTypeController extends Controller
         try{
 
             $discountType = $this->discountTypeService->deleteDiscountType($id);
-            ApiResponse::success(
+          return  ApiResponse::success(
                 $discountType,
                 'Discount type deleted successfully',
             );
         }catch(\Exception $e){
-            ApiResponse::error(
-                'Failed to delete discount type', 500
+           return ApiResponse::error(
+                'Failed to delete discount type or It does not exist', 500
             );
         }
 
