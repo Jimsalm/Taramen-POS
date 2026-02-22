@@ -51,7 +51,7 @@ This document summarizes the backend context for the Taramen POS project.
 - Auth: `POST /login`, `POST /logout`, `GET /user`
 - Categories: RESTful `/categories`
 - Menu items: RESTful `/menu-items`, `PATCH /menu-items/{id}/toggle-availability`, `POST /menu-items/{id}/restore`
-- Employees: RESTful `/employees`, `GET /employees/all`, `PATCH /employees/{id}/toggle-status`
+- Employees: RESTful `/employees`, `GET /employees/all`, `PATCH /employees/{id}/toggle-status`, `GET /employees/{id}/available`
 - Discounts: RESTful `/discounts`, `GET /discounts/getActive`
 - Orders: RESTful `/orders`, `PATCH /orders/{id}/status`, `GET /orders/stats`
 - Reports: `POST /report` with `start_date`, `end_date`
@@ -68,7 +68,7 @@ This document summarizes the backend context for the Taramen POS project.
 - Endpoint access logs via dedicated channels in `config/logging.php`
 - Endpoint access logs are also persisted to `endpoint_logs` via `App\Http\Middleware\LogEndpointAccess`
 - DB log schema migration: `database/migrations/2026_02_14_000000_create_endpoint_logs_table.php`
-- Endpoint log retention is scheduled in `routes/console.php` and controlled by `ENDPOINT_LOG_RETENTION_DAYS` (default in `.env.example`: `30`)
+- Endpoint log retention is scheduled in `routes/console.php` and controlled by `ENDPOINT_LOG_RETENTION_DAYS` (default in `.env.example`: `365`)
 
 ## Scheduled Maintenance
 - `sanctum:prune-expired --hours=24` runs daily (configured in `routes/console.php`)
