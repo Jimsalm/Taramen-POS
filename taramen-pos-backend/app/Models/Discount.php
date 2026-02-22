@@ -10,7 +10,7 @@ class Discount extends Model
 {
     protected $fillable = [
         'name',
-        'type',
+        'discount_type_id',
         'value',
         'active'
     ];
