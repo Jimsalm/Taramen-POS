@@ -145,7 +145,7 @@ class BundleMenuSeeder extends Seeder
             $fallback->price = 0;
             $fallback->available = false;
             $fallback->is_bundle = false;
-            $fallback->image = null;
+            $fallback->image_id = null;
         }
 
         if ($fallback->trashed()) {

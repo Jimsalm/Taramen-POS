@@ -42,7 +42,7 @@ class MenuItemSeeder extends Seeder
             $menuItem->price = $row['price'];
             if (!$menuItem->exists) {
                 $menuItem->available = true;
-                $menuItem->image = null;
+                $menuItem->image_id = null;
             }
 
             if ($menuItem->trashed()) {
