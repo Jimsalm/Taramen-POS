@@ -18,7 +18,17 @@ class ApiResponse
             'data' => $data,
         ];
 
-        if (!empty($meta)) {
+        $systemDefaultMeta  = [
+            "time" => now()->format('Y-m-d H:i:s'),
+            "api_version" => "1.0.0",
+            "request_id" => uniqid()
+        ];
+
+        $total_meta = array_merge($systemDefaultMeta, $meta);
+
+        if (empty($meta)) {
+            $payload['meta'] = $total_meta;
+        }else{
             $payload['meta'] = $meta;
         }
 
@@ -36,11 +46,21 @@ class ApiResponse
             'message' => $message,
         ];
 
+        $systemDefaultMeta  = [
+            "time" => now()->format('Y-m-d H:i:s'),
+            "api_version" => "1.0.0",
+            "request_id" => uniqid()
+        ];
+
         if (!empty($errors)) {
             $payload['errors'] = $errors;
         }
 
-        if (!empty($meta)) {
+        $total_meta = array_merge($systemDefaultMeta, $meta);
+
+        if (empty($meta)) {
+            $payload['meta'] = $total_meta;
+        }else{
             $payload['meta'] = $meta;
         }
 

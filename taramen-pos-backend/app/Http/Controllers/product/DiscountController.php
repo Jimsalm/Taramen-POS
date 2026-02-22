@@ -44,6 +44,7 @@ class DiscountController extends Controller
     }
 
 
+
     public function store(DiscountRequest $request)
     {
         $created_discount = $this->discountService->createDiscount($request);
