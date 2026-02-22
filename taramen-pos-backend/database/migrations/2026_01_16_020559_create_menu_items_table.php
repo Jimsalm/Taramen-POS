@@ -18,7 +18,7 @@ return new class extends Migration
             $table->foreignId('category_id')->nullable()->constrained()->onDelete('set null');
             $table->boolean('status')->default(true);
             $table->boolean('available')->default(true);
-            $table->foreignId('image_id')->nullable()->constrained("files");
+            $table->foreignId('image_id')->nullable()->constrained("files_uploads");
             $table->timestamps();
             $table->softDeletes();
         });
