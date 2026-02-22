@@ -14,6 +14,12 @@ class Category extends Model
     protected $fillable = [
         'name',
         'description',
+        'status',
+        'image',
+    ];
+
+    protected $casts = [
+        'status' => 'boolean',
     ];
 
     public function menuItems(): HasMany

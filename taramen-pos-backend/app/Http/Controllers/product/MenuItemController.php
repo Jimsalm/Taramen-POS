@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Product;
+namespace App\Http\Controllers\product;
 
 use App\Http\Controllers\Controller;
 use App\Models\MenuItem;
@@ -115,6 +115,7 @@ class MenuItemController extends Controller
         return ApiResponse::success(
             [
                 'id' => $menuItem->id,
+                'status' => $menuItem->status,
                 'available' => $menuItem->available
             ],
             'Menu item availability toggled successfully'

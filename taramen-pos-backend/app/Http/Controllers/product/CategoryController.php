@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Http\Controllers\Product;
+namespace App\Http\Controllers\product;
 
 use App\Http\Controllers\Controller;
 use App\Http\Responses\ApiResponse;
 use App\Models\Category;
 use App\Http\Requests\CategoryRequest;
+use Illuminate\Support\Facades\Storage;
 
 class CategoryController extends Controller
 {
@@ -25,7 +26,14 @@ class CategoryController extends Controller
      */
     public function store(CategoryRequest $request)
     {
-        $category = Category::create($request->validated());
+        $data = $request->validated();
+
+        if ($request->hasFile('image')) {
+            $data['image'] = $request->file('image')->store('categories', 'public');
+        }
+
+        $category = Category::create($data);
+
         return ApiResponse::success(
             $category,
             'Category created successfully',
@@ -51,8 +59,17 @@ class CategoryController extends Controller
     public function update(CategoryRequest $request, string $id)
     {
         $category = Category::findOrFail($id);
+        $data = $request->validated();
 
-        $category->update($request->validated());
+        if ($request->hasFile('image')) {
+            if ($category->image) {
+                Storage::disk('public')->delete($category->image);
+            }
+
+            $data['image'] = $request->file('image')->store('categories', 'public');
+        }
+
+        $category->update($data);
         
         return ApiResponse::success(
             $category,

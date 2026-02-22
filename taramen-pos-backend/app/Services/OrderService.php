@@ -130,6 +130,41 @@ class OrderService{
         return Order::with('orderItems', 'employee')->findOrFail($id);
     }
 
+    public function getReceipt($id){
+        $order = Order::with(['orderItems', 'employee'])->findOrFail($id);
+
+        return [
+            'order_id' => $order->id,
+            'order_number' => $order->order_number,
+            'created_at' => $order->created_at?->toDateTimeString(),
+            'table_number' => $order->table_number,
+            'status' => $order->status,
+            'employee' => [
+                'id' => $order->employee?->id,
+                'name' => $order->employee?->name,
+            ],
+            'items' => $order->orderItems->map(function ($item) {
+                return [
+                    'menu_item_id' => $item->menu_item_id,
+                    'item_name' => $item->item_name,
+                    'unit_price' => $item->unit_price,
+                    'quantity' => $item->quantity,
+                    'subtotal' => $item->subtotal,
+                    'discount_id' => $item->discount_id,
+                    'discount_name' => $item->discount_name,
+                    'discount_type' => $item->discount_type,
+                    'discount_amount' => $item->discount_amount,
+                    'total_amount' => $item->total_amount,
+                ];
+            })->values(),
+            'totals' => [
+                'subtotal' => $order->subtotal,
+                'total_discount' => $order->total_discount,
+                'total_amount' => $order->total_amount,
+            ],
+        ];
+    }
+
     public function updateOrder($id, $request){
         $order = Order::findOrFail($id);
         $validated_data = $request->validated();

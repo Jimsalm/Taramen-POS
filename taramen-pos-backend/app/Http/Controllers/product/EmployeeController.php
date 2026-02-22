@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Product;
+namespace App\Http\Controllers\product;
 
 use App\Http\Controllers\Controller;
 use App\Services\EmployeeService;
@@ -31,6 +31,7 @@ class EmployeeController extends Controller
 
     public function store(EmployeeRequest $request){
         $employee = $this->employeeService->createEmployee($request->validated());
+        $employee = $this->employeeService->updateEmployeeProfile($employee, $request->file('profile'));
 
         return ApiResponse::success(
             $employee,
@@ -51,6 +52,7 @@ class EmployeeController extends Controller
     public function update(EmployeeRequest $request, string $id){
         $employee = Employee::findOrFail($id);
         $employee = $this->employeeService->updateEmployee($employee, $request->validated());
+        $employee = $this->employeeService->updateEmployeeProfile($employee, $request->file('profile'));
 
         return ApiResponse::success(
             $employee,

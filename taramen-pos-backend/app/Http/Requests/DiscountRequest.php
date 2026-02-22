@@ -29,9 +29,9 @@ class DiscountRequest extends FormRequest
         $isUpdate = $this->routeIs('*.update');
 
         $rules = [
-            'type' => [
+            'discount_type_id' => [
                 $isUpdate ? 'sometimes' : 'required', 
-                new Enum(DiscountType::class)
+                'integer',
             ],
             
             'value' => [

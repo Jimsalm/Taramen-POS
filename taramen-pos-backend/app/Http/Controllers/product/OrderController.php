@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Product;
+namespace App\Http\Controllers\product;
 
 use App\Http\Controllers\Controller;
 use App\Services\OrderService;
@@ -60,6 +60,24 @@ class OrderController extends Controller
                 'action' => 'orders.show',
                 'order_id' => $id,
             ]);
+        }
+    }
+
+    public function receipt($id)
+    {
+        try {
+            $receipt = $this->orderService->getReceipt($id);
+
+            return ApiResponse::success(
+                $receipt,
+                'Receipt retrieved successfully'
+            );
+        } catch (\Exception $e) {
+            return ApiResponse::error(
+                'Failed to retrieve receipt',
+                500,
+                ['error' => $e->getMessage()]
+            );
         }
     }
     

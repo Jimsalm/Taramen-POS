@@ -29,6 +29,7 @@ class MenuItemRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'price' => ['required', 'numeric', 'min:0'],
             'category_id' => ['nullable', 'exists:categories,id'],
+            'status' => ['sometimes', 'boolean'],
             'available' => ['boolean'],
             'is_bundle' => ['sometimes', 'boolean'],
             'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],

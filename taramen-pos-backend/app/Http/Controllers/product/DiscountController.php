@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Product;
+namespace App\Http\Controllers\product;
 
 use App\Http\Requests\DiscountRequest;
 use App\Http\Controllers\Controller;
@@ -42,6 +42,7 @@ class DiscountController extends Controller
         );
 
     }
+
 
 
     public function store(DiscountRequest $request)
