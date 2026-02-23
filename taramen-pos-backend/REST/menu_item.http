@@ -1,0 +1,96 @@
+@baseUrl = http://localhost:8000/api/v1
+@email = admin@taramen.com
+@password = password123
+
+@token = 1|gJA8HHyeiN3tgOE9vCVtspmJaom1sDxc5a6MTt8U0ae51957
+
+@contentType = application/json
+@accept = application/json
+
+### ----------------------------------------------------------
+### 1. GET ALL MENU ITEMS
+### ----------------------------------------------------------
+GET {{baseUrl}}/menu-items
+Accept: {{accept}}
+Authorization: Bearer {{token}}
+
+### ----------------------------------------------------------
+### 2. CREATE NEW MENU ITEM (With Image)
+### Note: Change the file path to a real image on your PC
+### ----------------------------------------------------------
+POST {{baseUrl}}/menu-items
+Accept: {{accept}}
+Content-Type: multipart/form-data; boundary=MymeBoundary
+Authorization: Bearer {{token}}
+
+--MymeBoundary
+Content-Disposition: form-data; name="name"
+
+Classic Ramen
+--MymeBoundary
+Content-Disposition: form-data; name="price"
+
+150.00
+--MymeBoundary
+Content-Disposition: form-data; name="category_id"
+
+1
+--MymeBoundary
+Content-Disposition: form-data; name="available"
+
+1
+--MymeBoundary
+Content-Disposition: form-data; name="image"; filename="ramen.jpg"
+Content-Type: image/jpeg
+
+< D:/Taramen-POS/taramen-pos-backend/REST/ramen.jpg
+--MymeBoundary--
+
+### ----------------------------------------------------------
+### 3. GET SINGLE MENU ITEM (ID: 1)
+### ----------------------------------------------------------
+GET {{baseUrl}}/menu-items/2
+Accept: {{accept}}
+Authorization: Bearer {{token}}
+
+### ----------------------------------------------------------
+### 4. UPDATE MENU ITEM (With Image) - THE WORKAROUND
+### Laravel cannot read files on PUT. Use POST with _method: PUT
+### ----------------------------------------------------------
+POST {{baseUrl}}/menu-items/2
+Accept: {{accept}}
+Content-Type: multipart/form-data; boundary=MymeBoundary
+Authorization: Bearer {{token}}
+
+--MymeBoundary
+Content-Disposition: form-data; name="_method"
+
+PUT
+--MymeBoundary
+Content-Disposition: form-data; name="name"
+
+Cheese Burger Deluxe
+--MymeBoundary
+Content-Disposition: form-data; name="price"
+
+180.00
+--MymeBoundary
+Content-Disposition: form-data; name="image"; filename="ramen.jpg"
+Content-Type: image/jpeg
+
+< ./ramen.jpg
+--MymeBoundary--
+
+### ----------------------------------------------------------
+### 5. ARCHIVE (SOFT DELETE) MENU ITEM (ID: 1)
+### ----------------------------------------------------------
+DELETE {{baseUrl}}/menu-items/1
+Accept: {{accept}}
+Authorization: Bearer {{token}}
+
+### ----------------------------------------------------------
+### 6. RESTORE ARCHIVED ITEM (ID: 1)
+### ----------------------------------------------------------
+POST {{baseUrl}}/menu-items/2/restore
+Accept: {{accept}}
+Authorization: Bearer {{token}}
