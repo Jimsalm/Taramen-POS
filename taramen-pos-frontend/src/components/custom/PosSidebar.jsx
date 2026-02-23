@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import {
@@ -15,19 +15,26 @@ import {
 
 import { cn } from "@/lib/utils";
 import IButton from "@/components/custom/Button";
+import {
+  DASHBOARD,
+  MENU_CATEGORIES,
+  MENU_ITEMS,
+  STAFF,
+  TAKE_ORDER,
+} from "@/shared/constants/routes";
 
 const NAV_ITEMS = [
   {
     id: "order",
     label: "Take Order",
     icon: ShoppingBag,
-    path: "/orders",
+    path: TAKE_ORDER.path,
   },
   {
     id: "dashboard",
     label: "Dashboard",
     icon: LayoutGrid,
-    path: "/dashboard",
+    path: DASHBOARD.path,
   },
   {
     id: "menu",
@@ -38,13 +45,13 @@ const NAV_ITEMS = [
         id: "category",
         label: "Category",
         icon: Tag,
-        path: "/menu/categories",
+        path: MENU_CATEGORIES.path,
       },
       {
         id: "menu-items",
         label: "Menu Items",
         icon: List,
-        path: "/menu/items",
+        path: MENU_ITEMS.path,
       },
     ],
   },
@@ -52,12 +59,12 @@ const NAV_ITEMS = [
     id: "staff",
     label: "Staff",
     icon: Users,
-    path: "/staff",
+    path: STAFF.path,
   },
 ];
 
 const baseItemClasses =
-  "group flex min-h-[56px] w-full items-center gap-3 rounded-lg text-left text-xl font-semibold text-gray-600 transition-colors p-0 h-auto";
+  "group flex min-h-[52px] w-full items-center gap-3 rounded-lg text-left text-base font-semibold text-gray-600 transition-colors p-0 h-auto xl:min-h-[56px] xl:text-lg";
 const hoverClasses = "hover:bg-orange/10 hover:text-orange";
 const activeClasses = "bg-orange text-white";
 
@@ -69,15 +76,13 @@ export default function PosSidebar({
   const location = useLocation();
   const navigate = useNavigate();
   const isCollapsed = Boolean(isCollapsedProp);
-  const [pendingPath, setPendingPath] = useState(null);
   const menuItem = NAV_ITEMS.find((item) => item.children);
   const menuChildren = menuItem?.children ?? [];
   const isMenuActive = menuChildren.some((child) =>
-    (pendingPath ?? location.pathname).startsWith(child.path),
+    location.pathname.startsWith(child.path),
   );
   const [isMenuOpen, setIsMenuOpen] = useState(isMenuActive);
   const [enableWidthTransition, setEnableWidthTransition] = useState(false);
-  const navigateTimeoutRef = useRef();
 
   useEffect(() => {
     if (isMenuActive && !isCollapsed) setIsMenuOpen(true);
@@ -88,28 +93,16 @@ export default function PosSidebar({
   }, [isCollapsed]);
 
   useEffect(() => {
-    setPendingPath(null);
-  }, [location.pathname]);
-
-  useEffect(() => {
     const id = setTimeout(() => setEnableWidthTransition(true), 0);
     return () => clearTimeout(id);
   }, []);
 
-  useEffect(() => {
-    return () => {
-      if (navigateTimeoutRef.current) {
-        clearTimeout(navigateTimeoutRef.current);
-      }
-    };
-  }, []);
-
   const itemLayoutClasses = isCollapsed
     ? "justify-center gap-0 px-4"
-    : "justify-start px-6";
+    : "justify-start px-4 xl:px-6";
   const menuButtonSizeClasses = isCollapsed
     ? "!h-auto !py-0 !px-4"
-    : "!h-auto !py-0 !px-6";
+    : "!h-auto !py-0 !px-4 xl:!px-6";
   const labelClasses = cn(
     "min-w-0 overflow-hidden whitespace-nowrap transition-opacity duration-200",
     isCollapsed ? "w-0 opacity-0" : "flex-1 opacity-100",
@@ -118,21 +111,15 @@ export default function PosSidebar({
   const activeItemClass = activeClasses;
 
   const handleCollapsedNavigate = (path) => {
-    setPendingPath(path);
     onRequestExpand?.();
-    if (navigateTimeoutRef.current) {
-      clearTimeout(navigateTimeoutRef.current);
-    }
-    navigateTimeoutRef.current = setTimeout(() => {
-      navigate(path);
-    }, 160);
+    navigate(path);
   };
 
   return (
     <aside
-      style={{ width: isCollapsed ? 100 : 280 }}
       className={cn(
-        "relative flex h-[calc(100vh-72px)] flex-col overflow-hidden border-r border-gray-100 bg-white text-gray-800",
+        "relative flex h-[calc(100vh-72px)] shrink-0 flex-col overflow-hidden border-r border-gray-100 bg-white text-gray-800",
+        isCollapsed ? "w-[84px] lg:w-[92px]" : "w-[228px] xl:w-[280px]",
         enableWidthTransition &&
           "transition-[width] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-[width]",
       )}
@@ -212,10 +199,7 @@ export default function PosSidebar({
                       >
                         <div className="mt-2 flex flex-col gap-1 pl-6">
                           {item.children.map((child) => {
-                            const activePath = pendingPath ?? location.pathname;
-                            const isChildActive = activePath.startsWith(
-                              child.path,
-                            );
+                            const isChildActive = location.pathname.startsWith(child.path);
                             const ChildIcon = child.icon;
                             return (
                               <Link
@@ -224,7 +208,7 @@ export default function PosSidebar({
                                 className={cn(
                                   baseItemClasses,
                                   itemLayoutClasses,
-                                  "min-h-[48px] text-lg font-medium",
+                                  "min-h-[46px] text-sm font-medium xl:min-h-[48px] xl:text-base",
                                   isChildActive
                                     ? activeClasses
                                     : hoverClasses,
@@ -247,8 +231,7 @@ export default function PosSidebar({
               );
             }
 
-            const activePath = pendingPath ?? location.pathname;
-            const isActive = activePath === item.path;
+            const isActive = location.pathname === item.path;
             const Icon = item.icon;
             return (
               <div key={item.id} className="flex">
