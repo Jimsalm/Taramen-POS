@@ -11,9 +11,16 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use App\Helper\FileUploadHelper;
 
 class MenuItemService {
 
+
+    public function getAllItems(){
+        $menuItems = MenuItem::with(['category', 'bundleComponents.category', 'fileUpload'])->get();
+
+        return $menuItems->map(fn (MenuItem $menuItem) => $this->attachTemporaryImageUrl($menuItem));
+    }
     public function getAvailableMenuItems(){
         $menuItems = MenuItem::with(['category', 'bundleComponents.category', 'fileUpload'])
             ->where('available', true)
@@ -31,18 +38,7 @@ class MenuItemService {
             $data = $this->normalizeStatusFields($data);
 
             if ($image){
-                $current_year = Carbon::now()->format('Y');
-                $uuid = (string) Str::uuid();
-                $extension = $image->getClientOriginalExtension();
-                $storage_filename = $uuid;
-                $original_filename = $image->getClientOriginalName();
-                $path = $image->storeAs("menu_items/{$current_year}", "{$storage_filename}.{$extension}", 'public');
-                $file_uploaded =FilesUpload::create([
-                   "storage_filename" => $storage_filename,
-                   "original_name" => $original_filename,
-                   "extension" => $extension,
-                    "file_path" => $path
-                ]);
+                $file_uploaded = FileUploadHelper::upload($image, 'menu_items');
                 $data['image_id'] = $file_uploaded->id;
             }
 
@@ -78,21 +74,7 @@ class MenuItemService {
                 if ($menuItem->fileUpload?->file_path) {
                     Storage::disk('public')->delete($menuItem->fileUpload->file_path);
                 }
-
-                $current_year = Carbon::now()->format('Y');
-                $uuid = (string) Str::uuid();
-                $extension = $image->getClientOriginalExtension();
-                $storage_filename = $uuid;
-                $original_filename = $image->getClientOriginalName();
-                $path = $image->storeAs("menu_items/{$current_year}", $storage_filename . '.' . $extension, 'public');
-
-                $file_uploaded = FilesUpload::create([
-                    "storage_filename" => $storage_filename,
-                    "original_name" => $original_filename,
-                    "extension" => $extension,
-                    "file_path" => $path
-                ]);
-
+                $file_uploaded = FileUploadHelper::upload($image, 'menu_items');
                 $data['image_id'] = $file_uploaded->id;
             }
             $willBeBundle = array_key_exists('is_bundle', $data)
