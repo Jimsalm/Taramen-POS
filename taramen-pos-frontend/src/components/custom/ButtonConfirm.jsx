@@ -1,19 +1,9 @@
-import {
-   AlertDialog,
-   AlertDialogAction,
-   AlertDialogCancel,
-   AlertDialogContent,
-   AlertDialogDescription,
-   AlertDialogFooter,
-   AlertDialogHeader,
-   AlertDialogTitle,
-   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import { Loader2Icon } from "lucide-react";
-import useLoadingStore from "@/store/loadingStore";
+import { useCallback, useState } from "react";
+import useLoadingStore from "@/stores/useLoadingStore";
 import { cn } from "@/lib/utils";
 import { outlineButtonVariant } from "../ui/button-variants";
 import IButton from "./Button";
+import ConfirmModal from "./public/ConfirmModal";
 
 export default function IButtonConfirm({
    children,
@@ -32,6 +22,20 @@ export default function IButtonConfirm({
    isDirty = true,
 }) {
    const isLoading = useLoadingStore((state) => state.isLoading);
+   const [isOpen, setIsOpen] = useState(false);
+
+   const handleOpen = useCallback((event) => {
+      event?.stopPropagation?.();
+      setIsOpen(true);
+   }, []);
+
+   const handleClose = useCallback(() => {
+      setIsOpen(false);
+   }, []);
+
+   const handleConfirm = useCallback(() => {
+      onConfirm?.();
+   }, [onConfirm]);
 
    if (!isDirty) {
       return (
@@ -42,26 +46,34 @@ export default function IButtonConfirm({
    }
 
    return (
-      <AlertDialog>
-         <AlertDialogTrigger className={className} onClick={(e) => e.stopPropagation()}>
+      <>
+         <span
+            className={className}
+            onClick={handleOpen}
+            role={asButton ? "button" : undefined}
+            tabIndex={asButton ? 0 : undefined}
+         >
             {asButton ? (
                <span className={cn(outlineButtonVariant, triggerClassName, "cursor-pointer")}>{children}</span>
             ) : (
                <>{children}</>
             )}
-         </AlertDialogTrigger>
-         <AlertDialogContent className={`!max-w-sm p-4 ${dialogClassName}`}>
-            <AlertDialogHeader>
-               <AlertDialogTitle className={titleClassName}>{title}</AlertDialogTitle>
-               <AlertDialogDescription className={messageClassName}>{message}</AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-               <AlertDialogCancel className='border border-outline text-black'>{cancelLabel}</AlertDialogCancel>
-               <AlertDialogAction variant={primaryActionVariant} onClick={onConfirm}>
-                  {isLoading ? <Loader2Icon /> : confirmLabel}
-               </AlertDialogAction>
-            </AlertDialogFooter>
-         </AlertDialogContent>
-      </AlertDialog>
+         </span>
+         <ConfirmModal
+            isOpen={isOpen}
+            onClose={handleClose}
+            title={title}
+            message={message}
+            confirmLabel={confirmLabel}
+            cancelLabel={cancelLabel}
+            primaryActionVariant={primaryActionVariant}
+            onConfirm={handleConfirm}
+            onCancel={handleClose}
+            isLoading={isLoading}
+            className={dialogClassName}
+            titleClassName={titleClassName}
+            messageClassName={messageClassName}
+         />
+      </>
    );
 }

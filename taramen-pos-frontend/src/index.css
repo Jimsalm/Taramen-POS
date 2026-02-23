@@ -54,8 +54,8 @@
   --popover: oklch(1 0 0);
   --popover-foreground: rgb(10, 10, 10);
   --orange: #FF0605;
-  --emphasis: #FF0605;
-  --primary: #FF0605;
+  --emphasis: var(--orange);
+  --primary: var(--orange);
   --primary-foreground: oklch(0.985 0 0);
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(0.205 0 0);

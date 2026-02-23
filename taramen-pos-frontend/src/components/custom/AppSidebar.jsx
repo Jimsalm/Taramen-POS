@@ -38,7 +38,7 @@ const isRouteDisabled = (route) => {
   return { status: 'accessible', message: '' };
 };
 import { useEffect, useMemo, useState } from "react";
-import useSidebarStore from "@/store/sidebarStore";
+import useSidebarStore from "@/stores/sidebarStore";
 import ITooltip from "./Tooltip";
 import Title from "./Title";
 
