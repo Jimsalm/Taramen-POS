@@ -19,7 +19,7 @@ class MenuItemController extends Controller
      */
     public function index()
     {
-        $menuItems = MenuItem::with(['category', 'bundleComponents.category'])->get();
+        $menuItems = $this->menuItemService->getAllItems();
 
         return ApiResponse::success(
             $menuItems,
