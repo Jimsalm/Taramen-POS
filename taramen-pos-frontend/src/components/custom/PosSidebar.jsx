@@ -18,16 +18,16 @@ import IButton from "@/components/custom/Button";
 
 const NAV_ITEMS = [
   {
+    id: "order",
+    label: "Take Order",
+    icon: ShoppingBag,
+    path: "/orders",
+  },
+  {
     id: "dashboard",
     label: "Dashboard",
     icon: LayoutGrid,
     path: "/dashboard",
-  },
-  {
-    id: "order",
-    label: "Order",
-    icon: ShoppingBag,
-    path: "/orders",
   },
   {
     id: "menu",
@@ -130,9 +130,9 @@ export default function PosSidebar({
 
   return (
     <aside
-      style={{ width: isCollapsed ? 100 : 320 }}
+      style={{ width: isCollapsed ? 100 : 280 }}
       className={cn(
-        "relative flex h-[calc(100vh-72px)] flex-col overflow-hidden border-r border-gray-100 bg-white text-gray-800 font-['Manrope','Segoe_UI',system-ui,sans-serif]",
+        "relative flex h-[calc(100vh-72px)] flex-col overflow-hidden border-r border-gray-100 bg-white text-gray-800",
         enableWidthTransition &&
           "transition-[width] duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-[width]",
       )}
