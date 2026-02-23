@@ -1,82 +1,191 @@
-import { useState } from "react";
+import { User, Loader2, ShieldCheck, Clock3, UtensilsCrossed } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { toast } from "sonner";
-import IAlert from "../components/custom/Alert";
 import IButton from "../components/custom/Button";
 import ICard from "../components/custom/Card";
 import Form from "../components/custom/Form";
 import IInput from "../components/custom/Input";
+import Paragraph from "../components/custom/Paragraph";
+import Title from "../components/custom/Title";
 import LoginLayout from "../layout/LoginLayout";
 import { loginSchema } from "../shared/lib/zod/schema/login";
-import { LockIcon, MailIcon, UtensilsCrossed } from "lucide-react"; 
+import { useLogin } from "../hooks/useAuth";
+import useAuthStore from "../stores/useAuthStore";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../components/ui/dialog";
+import IAlert from "../components/custom/Alert";
+import { Badge } from "../components/ui/badge";
 
 export default function Login() {
-   const [error, setError] = useState(null);
    const navigate = useNavigate();
+   const { 
+      isLoading,
+      errorMessage,
+      clearError,
+      openForgotPasswordModal,
+      isForgotPasswordModalOpen,
+      closeForgotPasswordModal
+   } = useAuthStore();
+
+   const { mutate: login } = useLogin();
+   const highlights = [
+      {
+         icon: UtensilsCrossed,
+         title: "Fast service",
+         description: "Keep orders moving with a focused workflow.",
+      },
+      {
+         icon: ShieldCheck,
+         title: "Secure access",
+         description: "Quick sign-in with protected sessions.",
+      },
+      {
+         icon: Clock3,
+         title: "Clear pacing",
+         description: "Stay aligned on tables and timing.",
+      },
+   ];
 
    const onSubmit = async (data) => {
-      setError(null);
-      const id = toast.loading("Signing you in...");
-
-      try {
-         await new Promise(resolve => setTimeout(resolve, 1000));
-         
-         if (!data.username || !data.password) {
-            throw new Error("Please fill in all fields");
+      clearError(); // Clear any previous errors
+      login(data, {
+         onSuccess: () => {
+            navigate("/dashboard", { replace: true });
          }
-         
-         const mockToken = "mock-jwt-token";
-         localStorage.setItem("token", mockToken);
-         
-         toast.dismiss(id);
-         toast.success("Login successful!");
-         navigate("/dashboard", { replace: true });
-      } catch (error) {
-         toast.dismiss(id);
-         setError(error.message);
-      }
+      });
    };
 
    return (
       <LoginLayout>
-         <section className='flex flex-col items-center justify-center mb-12 lg:mb-0'>
+         <main className="w-full max-w-none mx-auto grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-12 items-center">
+            <section className="order-2 md:order-1 text-white space-y-7 md:space-y-9">
+               <header className="flex flex-col items-start gap-4">
+                  <Badge className="bg-white/15 text-white border border-white/20 px-3 py-1 text-sm tracking-wide">
+                     Ta'ramen POS
+                  </Badge>
+                  <Title size="3xl" className="text-white leading-tight sm:text-4xl md:text-4xl">
+                     Welcome back. Let&apos;s keep service moving.
+                  </Title>
+                  <Paragraph size="md" variant="default" className="text-white/75 max-w-xl">
+                     Sign in to manage orders, tables, and your shift with a clean, kitchen-ready flow.
+                  </Paragraph>
+               </header>
+               <ul className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {highlights.map((item) => {
+                     const Icon = item.icon;
+                     return (
+                        <li
+                           key={item.title}
+                           className="flex items-start gap-3 rounded-2xl border border-white/15 bg-white/10 p-4 md:p-5 backdrop-blur-sm"
+                        >
+                           <div className="rounded-xl bg-white/15 p-2.5">
+                              <Icon className="size-5 md:size-6 text-white" />
+                           </div>
+                           <div className="space-y-1">
+                              <span className="text-base font-semibold">{item.title}</span>
+                              <Paragraph size="sm" variant="default" className="text-white/70">
+                                 {item.description}
+                              </Paragraph>
+                           </div>
+                        </li>
+                     );
+                  })}
+               </ul>
+               <Paragraph size="sm" variant="default" className="text-white/60">
+                  Need access? Contact your manager to add or reset your account.
+               </Paragraph>
+            </section>
+
             <ICard
                logo={
-                  <img 
-                     src="/Taramen.png" 
-                     alt="Ta'ramen POS"
-                     className="size-50 w-auto mx-auto block"
-                  />
-               }
-               title='Welcome Back!'
-               description='Enter your credentials to access your account'
-               descriptionClassName='text-gray-600'
-               cardClassName='text-center w-128 bg-white hover:bg-gray-50 transition-all duration-300 relative overflow-hidden border-0 shadow-2xl shadow-black/60'
-               cardContentClassName='pb-14 w-96 mx-auto'
-               cardTitleClassName='md:text-3xl text-[#FF0605]'
-            >
-               <Form className='flex flex-col gap-6' size- onSubmit={onSubmit} schema={loginSchema}>
-                  <IInput name='username' placeholder='Username' prefix={<MailIcon className='size-4 text-gray-500' />} className='h-12' />
-                  <IInput
-                     name='password'
-                     type='password'
-                     placeholder='Password'
-                     prefix={<LockIcon className='size-4 text-gray-500' />}
-                     className='h-12'
-                  />
-                  <div className='flex justify-end'>
-                     <IButton type='button' variant='ghost' className='text-sm text-[#FF0605] p-0 h-auto'>
-                        Forgot Password?
-                     </IButton>
+                  <div className="flex flex-col items-center">
+                     <div className="rounded-2xl bg-orange/10 border border-orange/20 p-3">
+                        <img 
+                           src="/Taramen.png" 
+                           alt="Ta'ramen POS"
+                           className="h-12 md:h-14 w-auto block"
+                        />
+                     </div>
                   </div>
-                  <IButton type='submit' variant='destructive' className='w-full'>
-                     Log in
+               }
+               title="Sign In"
+               description="Enter your credentials to continue."
+               descriptionClassName="text-gray-500 text-sm md:text-base"
+               cardClassName="order-1 md:order-2 text-center w-full bg-white/95 backdrop-blur border border-white/60 shadow-2xl/70 rounded-3xl"
+               cardContentClassName="pb-10 px-8 md:px-10 pt-4"
+               cardTitleClassName="text-2xl md:text-3xl text-gray-900"
+               cardHeaderClassName="gap-3 pt-8 md:pt-10"
+            >
+               <Form className="flex flex-col gap-6 md:gap-7" onSubmit={onSubmit} schema={loginSchema}>
+                  <IInput 
+                     name="email" 
+                     type="email"
+                     label="Email"
+                     placeholder="Enter your email" 
+                     labelClassName="font-semibold text-sm md:text-sm text-gray-700"
+                     className="bg-white/90 border border-gray-200 h-12 md:h-14 text-base md:text-base px-4 md:px-5 rounded-xl shadow-sm"
+                     wrapperClassName="gap-2"
+                     suffix={<User className="size-5 text-gray-500" />}
+                  />
+                  <div className="space-y-2">
+                     <div className="flex justify-between items-center">
+                        <div className="font-semibold text-sm md:text-sm text-gray-700">Password</div>
+                        <IButton 
+                           type="button" 
+                           variant="ghost" 
+                           className="text-sm md:text-sm text-orange hover:text-orange/80 p-0 h-auto font-semibold"
+                           onClick={openForgotPasswordModal}
+                        >
+                           Forgot password?
+                        </IButton>
+                     </div>
+                     <IInput
+                        name="password"
+                        type="password"
+                        placeholder="Enter your password"
+                        className="bg-white/90 border border-gray-200 h-12 md:h-14 text-base md:text-base px-4 md:px-5 rounded-xl shadow-sm"
+                     />
+                  </div>
+                  <IButton 
+                     type="submit" 
+                     variant="orange" 
+                     className="w-full font-semibold h-12 md:h-14 text-base md:text-base tracking-wide flex items-center justify-center gap-2 rounded-xl" 
+                     disabled={isLoading}
+                  >
+                     {isLoading ? (
+                        <>
+                           <Loader2 className="h-4 w-4 animate-spin" />
+                           SIGNING IN...
+                        </>
+                     ) : "SIGN IN"}
                   </IButton>
-
-                  {error && <IAlert description={error} />}
+                  {errorMessage && (
+                     <div className="pt-2">
+                        <IAlert variant="destructive" description={errorMessage} />
+                     </div>
+                  )}
                </Form>
             </ICard>
-         </section>
+         </main>
+
+         <Dialog
+            open={isForgotPasswordModalOpen}
+            onOpenChange={(open) => !open && closeForgotPasswordModal()}
+         >
+            <DialogContent>
+               <DialogHeader>
+                  <Title size="lg" className="text-gray-900">
+                     Forgot Password
+                  </Title>
+                  <Paragraph size="sm" className="text-gray-600">
+                     Please contact the administrator to reset your password.
+                  </Paragraph>
+               </DialogHeader>
+               <div className="flex justify-end">
+                  <IButton onClick={closeForgotPasswordModal} variant="outline">
+                     Close
+                  </IButton>
+               </div>
+            </DialogContent>
+         </Dialog>
       </LoginLayout>
    );
 }

@@ -1,40 +1,82 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useCallback, useContext, useRef, useState } from "react";
+import ConfirmModal from "@/components/custom/ConfirmModal";
 
 const ConfirmContext = createContext();
 
-export function ConfirmProvider({ children }) {
-  const [confirmState, setConfirmState] = useState({
-    isOpen: false,
-    title: '',
-    message: '',
-    onConfirm: null,
-    onCancel: null,
-  });
+const defaultState = {
+  isOpen: false,
+  title: "",
+  message: "",
+  onConfirm: null,
+  onCancel: null,
+  confirmLabel: "Confirm",
+  cancelLabel: "Cancel",
+  primaryActionVariant: "default",
+};
 
-  const confirm = (title, message, onConfirm, onCancel) => {
+const useConfirmState = () => {
+  const [confirmState, setConfirmState] = useState(defaultState);
+  const resolverRef = useRef(null);
+  const settledRef = useRef(false);
+
+  const resolveOnce = useCallback((result, callback) => {
+    if (settledRef.current) return;
+    settledRef.current = true;
+    setConfirmState((prev) => ({ ...prev, isOpen: false }));
+    callback?.();
+    resolverRef.current?.(result);
+  }, []);
+
+  const confirm = useCallback((title, message, onConfirm, onCancel) => {
     return new Promise((resolve) => {
+      resolverRef.current = resolve;
+      settledRef.current = false;
       setConfirmState({
+        ...defaultState,
         isOpen: true,
-        title,
-        message,
-        onConfirm: () => {
-          setConfirmState(prev => ({ ...prev, isOpen: false }));
-          if (onConfirm) onConfirm();
-          resolve(true);
-        },
-        onCancel: () => {
-          setConfirmState(prev => ({ ...prev, isOpen: false }));
-          if (onCancel) onCancel();
-          resolve(false);
-        },
+        title: title ?? "",
+        message: message ?? "",
+        onConfirm,
+        onCancel,
       });
     });
-  };
+  }, []);
+
+  const handleConfirm = useCallback(
+    () => resolveOnce(true, confirmState.onConfirm),
+    [resolveOnce, confirmState.onConfirm]
+  );
+
+  const handleCancel = useCallback(
+    () => resolveOnce(false, confirmState.onCancel),
+    [resolveOnce, confirmState.onCancel]
+  );
+
+  const handleClose = useCallback(
+    () => resolveOnce(false, confirmState.onCancel),
+    [resolveOnce, confirmState.onCancel]
+  );
+
+  return { confirmState, confirm, handleConfirm, handleCancel, handleClose };
+};
+
+export function ConfirmProvider({ children }) {
+  const { confirmState, confirm, handleConfirm, handleCancel, handleClose } = useConfirmState();
 
   return (
     <ConfirmContext.Provider value={{ confirm }}>
       {children}
-      {/* Modal implementation would go here */}
+      <ConfirmModal
+        isOpen={confirmState.isOpen}
+        onClose={handleClose}
+        title={confirmState.title}
+        message={confirmState.message}
+        confirmLabel={confirmState.confirmLabel}
+        cancelLabel={confirmState.cancelLabel}
+        primaryActionVariant={confirmState.primaryActionVariant}
+        onConfirm={handleConfirm}
+        onCancel={handleCancel}
+      />
     </ConfirmContext.Provider>
   );
 }
@@ -51,57 +93,22 @@ export function useConfirm() {
 let globalConfirm = null;
 
 export function ConfirmationDialog() {
-  const [confirmState, setConfirmState] = useState({
-    isOpen: false,
-    title: '',
-    message: '',
-    onConfirm: null,
-    onCancel: null,
-  });
+  const { confirmState, confirm, handleConfirm, handleCancel, handleClose } = useConfirmState();
 
-  globalConfirm = (title, message, onConfirm, onCancel) => {
-    return new Promise((resolve) => {
-      setConfirmState({
-        isOpen: true,
-        title,
-        message,
-        onConfirm: () => {
-          setConfirmState(prev => ({ ...prev, isOpen: false }));
-          if (onConfirm) onConfirm();
-          resolve(true);
-        },
-        onCancel: () => {
-          setConfirmState(prev => ({ ...prev, isOpen: false }));
-          if (onCancel) onCancel();
-          resolve(false);
-        },
-      });
-    });
-  };
-
-  if (!confirmState.isOpen) return null;
+  globalConfirm = confirm;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-        <h3 className="text-lg font-semibold mb-2">{confirmState.title}</h3>
-        <p className="text-gray-600 mb-4">{confirmState.message}</p>
-        <div className="flex gap-2 justify-end">
-          <button
-            onClick={confirmState.onCancel}
-            className="px-4 py-2 text-gray-600 border border-gray-300 rounded hover:bg-gray-50"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={confirmState.onConfirm}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-          >
-            Confirm
-          </button>
-        </div>
-      </div>
-    </div>
+    <ConfirmModal
+      isOpen={confirmState.isOpen}
+      onClose={handleClose}
+      title={confirmState.title}
+      message={confirmState.message}
+      confirmLabel={confirmState.confirmLabel}
+      cancelLabel={confirmState.cancelLabel}
+      primaryActionVariant={confirmState.primaryActionVariant}
+      onConfirm={handleConfirm}
+      onCancel={handleCancel}
+    />
   );
 }
 
