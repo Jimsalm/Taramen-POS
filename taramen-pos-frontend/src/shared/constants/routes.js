@@ -5,6 +5,11 @@ export const LOGIN = {
    title: "Login",
 };
 
+export const LOGOUT = {
+   path: "/logout",
+   title: "Logout",
+};
+
 export const DASHBOARD = {
    path: "/dashboard",
    title: "Dashboard",

@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { config } from "../config";
 import useAuthStore from "../stores/useAuthStore";
@@ -40,9 +41,9 @@ export const useLogin = () => {
 };
 
 export const useLogout = () => {
-  return () => {
+  return useCallback(() => {
     localStorage.removeItem("auth_token");
     localStorage.removeItem("auth_user");
     window.location.href = "/login"; 
-  };
+  }, []);
 };

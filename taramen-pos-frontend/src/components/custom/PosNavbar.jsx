@@ -6,6 +6,8 @@ import Title from "@/components/custom/Title";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import PosNotificationBar from "@/components/custom/PosNotificationBar";
 import { cn } from "@/lib/utils";
+import { useLogout } from "@/hooks/useAuth";
+import { confirmAction } from "@/shared/helpers/confirmAction";
 
 const getInitials = (name = "") =>
   name
@@ -25,8 +27,17 @@ export default function PosNavbar({
   profileAvatar,
   showToggle = true,
 }) {
+  const logout = useLogout();
+  const handleLogout = () => {
+    confirmAction(
+      "Sign out",
+      "Are you sure you want to log out?",
+      () => logout()
+    );
+  };
+
   return (
-    <div className="fixed inset-x-0 top-0 z-20 flex h-[72px] items-center justify-between gap-3 border-b border-gray-100 bg-white px-6 py-0 shadow-sm font-['Manrope','Segoe_UI',system-ui,sans-serif]">
+    <div className="fixed inset-x-0 top-0 z-20 flex h-[72px] items-center justify-between gap-3 border-b border-gray-100 bg-white px-6 py-0 shadow-sm">
       <div className="flex items-center gap-3">
         {showToggle ? (
           <IButton
@@ -81,6 +92,7 @@ export default function PosNavbar({
           showLoading={false}
           className="size-10 rounded-2xl border-gray-200 bg-white text-gray-600 shadow-md hover:border-orange/30 hover:text-orange"
           aria-label="Logout"
+          onClick={handleLogout}
         >
           <LogOut className="size-4" />
         </IButton>
