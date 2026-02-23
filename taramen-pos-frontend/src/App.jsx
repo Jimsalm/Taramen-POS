@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import ProtectedRoute from "./components/custom/ProtectedRoute";
 import Login from "./pages/Login";
+import Logout from "./pages/Logout";
 import Dashboard from "./pages/Dashboard";
 import MenuCategories from "./pages/MenuCategories";
 import MenuItems from "./pages/MenuItems";
@@ -10,6 +11,7 @@ import TakeOrder from "./pages/TakeOrder";
 import {
    DASHBOARD,
    LOGIN,
+   LOGOUT,
    MENU_CATEGORIES,
    MENU_ITEMS,
    NOT_FOUND,
@@ -31,6 +33,7 @@ export default function App() {
       <Routes>
          <Route path="/" element={<Navigate to={LOGIN.path} replace />} />
          <Route path={LOGIN.path} element={<Login />} />
+         <Route path={LOGOUT.path} element={<Logout />} />
          <Route path={NOT_FOUND.path} element={<NotFound />} />
 
          {protectedRoutes.map(({ path, element }) => (
