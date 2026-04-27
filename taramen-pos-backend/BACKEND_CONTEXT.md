@@ -248,8 +248,9 @@ Requests live in `app/Http/Requests`.
 3. Order number is generated as `YYYYMMDD####`.
 4. Each item snapshots current menu item name and price.
 5. If a valid active discount is attached to that menu item, discount snapshot fields are stored on the order item.
-6. Order totals are recalculated from order items.
-7. The response loads `orderItems` and `employee`.
+6. If a submitted `discount_id` is inactive, unsupported, or not attached to the selected menu item, order creation fails with a `422` validation response and the transaction rolls back.
+7. Order totals are recalculated from order items.
+8. The response loads `orderItems` and `employee`.
 
 Order statuses are `pending`, `completed`, and `cancelled`. Completed orders cannot be deleted through `OrderService::deleteOrder`.
 
@@ -282,7 +283,7 @@ Seeder behavior:
 - `CategorySeeder` and `MenuItemSeeder` parse root `taramen_menu.md`.
 - Duplicate menu item names are decorated with the category name.
 - `BundleMenuSeeder` creates/restores bundle categories, bundle menu items, and bundle component relations.
-- `DiscountTypeSeeder` seeds `percentage`, `fixed`, and `b1t1`.
+- `DiscountTypeSeeder` seeds `percentage`, `fixed`, and `buy1take1`.
 
 ## Frontend Contract Snapshot
 
