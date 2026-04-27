@@ -116,14 +116,14 @@ export default function IInput({
                   <EyeClosedIcon
                      className={`${
                         isLoading ? "pointer-events-none" : ""
-                     } absolute top-1/2 right-3 -translate-y-1/2 cursor-pointer size-4.5 select-none text-gray-500`}
+                     } absolute top-1/2 right-3 -translate-y-1/2 cursor-pointer size-6 select-none text-gray-600`}
                      onClick={() => setPasswordVisible(!passwordVisible)}
                   />
                ) : (
                   <EyeIcon
                      className={`${
                         isLoading ? "pointer-events-none" : ""
-                     } absolute top-1/2 right-3 -translate-y-1/2 cursor-pointer size-4.5 select-none text-gray-500`}
+                     } absolute top-1/2 right-3 -translate-y-1/2 cursor-pointer size-6 select-none text-gray-600`}
                      onClick={() => setPasswordVisible(!passwordVisible)}
                   />
                ))}
