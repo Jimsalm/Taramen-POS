@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Http\Requests\OrderRequest;
 use App\Http\Responses\ApiResponse;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 
 class OrderController extends Controller
 {
@@ -38,6 +39,8 @@ class OrderController extends Controller
                 'Order created successfully',
                 201
             );
+        } catch (ValidationException $e) {
+            throw $e;
         } catch (\Exception $e) {
             return $this->internalErrorResponse('Failed to create order', $e, [
                 'action' => 'orders.store',
