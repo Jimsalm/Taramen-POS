@@ -40,7 +40,7 @@ export default function Login() {
                      <img 
                         src="/taramen.svg" 
                         alt="Ta'ramen POS"
-                        className="h-28 w-auto mx-auto block"
+                        className="h-32 w-auto mx-auto block"
                      />        
                   </div>
                }
@@ -49,7 +49,7 @@ export default function Login() {
                descriptionClassName="text-gray-400 text-lg font-normal"
                cardClassName="text-center w-full bg-white border border-white/60 shadow-2xl rounded-3xl"
                cardContentClassName="pb-8 px-10 pt-12"
-               cardTitleClassName="text-xl text-gray-900 font-bold"
+               cardTitleClassName="text-xl text-gray-800 font-bold"
                cardHeaderClassName="gap-1"
             >
                <Form className="flex flex-col" onSubmit={onSubmit} schema={loginSchema}>
