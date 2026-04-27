@@ -18,11 +18,11 @@ export default function OrderSidebar({
   orderId = "#ORD-0000",
   dineType = "dine-in",
   onDineTypeChange,
-  tableNo = "",
-  onTableChange,
-  serverValue = "",
-  serverOptions = [],
-  onServerChange,
+  tableNumber = "",
+  onTableNumberChange,
+  employeeValue = "",
+  employeeOptions = [],
+  onEmployeeChange,
   items = [],
   onQtyChange,
   discountValue = "none",
@@ -88,8 +88,8 @@ export default function OrderSidebar({
           <div className="relative">
             <Table2 className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-400" />
             <Input
-              value={tableNo}
-              onChange={(event) => onTableChange?.(event.target.value)}
+              value={tableNumber}
+              onChange={(event) => onTableNumberChange?.(event.target.value)}
               className="h-10 pl-9 text-sm font-semibold"
               inputMode="numeric"
               disabled={dineType === "takeout"}
@@ -98,15 +98,15 @@ export default function OrderSidebar({
         </label>
         <label className="space-y-2">
           <Paragraph size="xs" className="text-gray-500 font-semibold uppercase">
-            Server
+            Employee
           </Paragraph>
-          <Select value={serverValue} onValueChange={onServerChange}>
+          <Select value={employeeValue} onValueChange={onEmployeeChange}>
             <SelectTrigger className="h-10 w-full text-sm font-semibold">
               <User className="size-4 text-gray-400" />
-              <SelectValue placeholder="Select server" />
+              <SelectValue placeholder="Select employee" />
             </SelectTrigger>
             <SelectContent>
-              {serverOptions.map((option) => (
+              {employeeOptions.map((option) => (
                 <SelectItem key={option.value} value={option.value}>
                   {option.label}
                 </SelectItem>

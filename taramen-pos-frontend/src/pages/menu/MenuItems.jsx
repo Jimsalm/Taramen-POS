@@ -17,13 +17,13 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
-  extractErrorMessage,
   useCategories,
   useCreateMenuItem,
   useMenuItems,
   useToggleMenuItemAvailability,
 } from "@/hooks/usePosApi";
 import PosLayout from "@/layout/PosLayout";
+import { extractErrorMessage } from "@/shared/helpers/extractErrorMessage";
 import { getRequestFileUrl } from "@/shared/helpers/getRequestFileUrl";
 
 const MENU_TYPE_OPTIONS = [
