@@ -43,7 +43,7 @@ class OrderController extends Controller
         } catch (ValidationException $e) {
             throw $e;
         } catch (\Exception $e) {
-            return $this->internalErrorResponse('Failed to create order', $e, [
+            return $this->internalErrorResponse('Failed to create order: ' . $e->getMessage(), $e, [
                 'action' => 'orders.store',
             ]);
         }
