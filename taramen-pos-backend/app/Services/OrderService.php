@@ -197,7 +197,7 @@ class OrderService{
                     'unit_price' => $item->unit_price,
                     'quantity' => $item->quantity,
                     'subtotal' => $item->subtotal,
-                    'discount_id' => $item->discount_id,
+                    'discount_id' => $item->discount_id ?? null,
                     'discount_name' => $item->discount_name,
                     'discount_type' => $item->discount_type,
                     'discount_amount' => $item->discount_amount,
@@ -212,13 +212,20 @@ class OrderService{
         ];
     }
 
-    public function updateOrder($id, $request){
-        $order = Order::findOrFail($id);
-        $validated_data = $request->validated();
-
-        $order->update($validated_data);
-        return $order->fresh(['orderItems', 'employee']);
+   public function updateOrder($id, $request){
+    $order = Order::findOrFail($id);
+    $validated_data = $request->validated();
+    $order->update($validated_data);
+    $order->orderItems()->delete();
+    foreach($validated_data['items'] as $index => $item) {
+        $this->createOrderItem($order, $item, $index);
     }
+
+    $order->calculateTotalAmount();
+    $order->save();
+
+    return $order->fresh(['orderItems', 'employee']);
+}
 
     public function updateOrderStatus($id, $status){
         $order = Order::findOrFail($id);

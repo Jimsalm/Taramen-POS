@@ -85,6 +85,7 @@ class OrderController extends Controller
         }
     }
 
+
     public function update(OrderRequest $request, $id)
     {
         try {
@@ -95,7 +96,7 @@ class OrderController extends Controller
                 'Order updated successfully'
             );
         } catch (\Exception $e) {
-            return $this->internalErrorResponse('Failed to update order', $e, [
+            return $this->internalErrorResponse('Failed to update order: '. $e->getMessage(), $e, [
                 'action' => 'orders.update',
                 'order_id' => $id,
             ]);
