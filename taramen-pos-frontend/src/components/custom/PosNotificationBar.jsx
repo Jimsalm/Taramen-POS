@@ -42,7 +42,7 @@ export default function PosNotificationBar({
         align="end"
         side="bottom"
         sideOffset={10}
-        className="w-[360px] rounded-2xl border border-gray-100 bg-white p-0 shadow-xl"
+        className="w-[22.5rem] rounded-2xl border border-gray-100 bg-white p-0 shadow-xl"
       >
         <div className="flex items-center justify-between gap-3 border-b border-gray-100 px-4 py-4">
           <Title size="sm" className="text-gray-900">
@@ -93,7 +93,7 @@ export default function PosNotificationBar({
             </IButton>
           </div>
         </div>
-        <div className="max-h-[360px] overflow-auto px-4 pb-4">
+        <div className="max-h-[22.5rem] overflow-auto px-4 pb-4">
           {hasNotifications ? (
             <ul className="space-y-3">
               {filteredNotifications.map((item, index) => {

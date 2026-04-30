@@ -1,14 +1,42 @@
+import { useMemo } from "react";
+
 import Paragraph from "@/components/custom/Paragraph";
 import Title from "@/components/custom/Title";
 import { cn } from "@/lib/utils";
+import { ITEM_ACCENTS } from "@/pages/take-order/take-order-config";
+import { formatCurrency } from "@/pages/take-order/utils";
+import { useAvailableMenuItemsQuery } from "@/queries/useTakeOrderQueries";
+import useTakeOrderStore from "@/stores/useTakeOrderStore";
 
-export default function TakeOrderMenuGrid({
-  items = [],
-  isLoading = false,
-  hasError = false,
-  onAddItem,
-  formatCurrency,
-}) {
+export default function MenuGrid() {
+  const menuItemsQuery = useAvailableMenuItemsQuery();
+  const activeCategory = useTakeOrderStore((state) => state.activeCategory);
+  const addItem = useTakeOrderStore((state) => state.addItem);
+  const searchTerm = useTakeOrderStore((state) => state.searchTerm);
+
+  const items = useMemo(() => {
+    const term = searchTerm.trim().toLowerCase();
+
+    return (menuItemsQuery.data ?? [])
+      .filter((item) => item.available)
+      .map((item, index) => ({
+        ...item,
+        accent: ITEM_ACCENTS[index % ITEM_ACCENTS.length],
+      }))
+      .filter((item) => {
+        const matchesCategory =
+          activeCategory === "all" ||
+          String(item.category_id) === String(activeCategory);
+        if (!matchesCategory) return false;
+        if (!term) return true;
+
+        return (
+          item.name.toLowerCase().includes(term) ||
+          String(item.description ?? "").toLowerCase().includes(term)
+        );
+      });
+  }, [activeCategory, menuItemsQuery.data, searchTerm]);
+
   return (
     <div className="mt-6">
       <Title size="md" className="text-gray-900">
@@ -23,7 +51,7 @@ export default function TakeOrderMenuGrid({
             <button
               type="button"
               className="w-full text-left"
-              onClick={() => onAddItem(item)}
+              onClick={() => addItem(item)}
             >
               <div
                 className={cn(
@@ -44,7 +72,7 @@ export default function TakeOrderMenuGrid({
             </button>
           </li>
         ))}
-        {!isLoading && !hasError && items.length === 0 ? (
+        {!menuItemsQuery.isLoading && !menuItemsQuery.isError && items.length === 0 ? (
           <li className="col-span-full rounded-2xl border border-dashed border-gray-200 bg-gray-50 p-6 text-center text-sm text-gray-500">
             No available menu items match this filter.
           </li>

@@ -3,12 +3,12 @@ import { ArrowLeft, Search } from "lucide-react";
 import IButton from "@/components/custom/Button";
 import Title from "@/components/custom/Title";
 import { Badge } from "@/components/ui/badge";
+import useTakeOrderStore from "@/stores/useTakeOrderStore";
 
-export default function TakeOrderHeader({
-  searchTerm,
-  onSearchChange,
-  onBack,
-}) {
+export default function TakeOrderHeader({ onBack }) {
+  const searchTerm = useTakeOrderStore((state) => state.searchTerm);
+  const setField = useTakeOrderStore((state) => state.setField);
+
   return (
     <header className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center justify-between gap-4">
@@ -35,7 +35,7 @@ export default function TakeOrderHeader({
         <input
           type="text"
           value={searchTerm}
-          onChange={(event) => onSearchChange(event.target.value)}
+          onChange={(event) => setField("searchTerm", event.target.value)}
           placeholder="Search menu items..."
           className="h-11 w-full rounded-full border border-gray-200 bg-white pl-10 pr-4 text-sm text-gray-700 outline-none focus:border-orange/60 focus:ring-2 focus:ring-orange/20"
         />

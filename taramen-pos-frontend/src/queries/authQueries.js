@@ -1,7 +1,7 @@
-import { useCallback } from "react";
 import { useMutation } from "@tanstack/react-query";
-import { config } from "../config";
-import useAuthStore from "../stores/useAuthStore";
+
+import { config } from "@/config";
+import useAuthStore from "@/stores/useAuthStore";
 
 const loginApi = async (credentials) => {
   const response = await fetch(`${config.api.baseUrl}/login`, {
@@ -9,7 +9,7 @@ const loginApi = async (credentials) => {
     headers: { "Content-Type": "application/json", "Accept": "application/json" },
     body: JSON.stringify({
       email: credentials.email ?? credentials.username,
-      password: credentials.password
+      password: credentials.password,
     }),
   });
 
@@ -23,7 +23,11 @@ const loginApi = async (credentials) => {
   return data;
 };
 
-export const useLogin = () => {
+export const AUTH_KEYS = {
+  login: ["auth", "login"],
+};
+
+export const useLoginMutation = () => {
   const { showError, setLoading } = useAuthStore();
 
   return useMutation({
@@ -38,12 +42,4 @@ export const useLogin = () => {
     },
     onError: (error) => showError(error.message),
   });
-};
-
-export const useLogout = () => {
-  return useCallback(() => {
-    localStorage.removeItem("auth_token");
-    localStorage.removeItem("auth_user");
-    window.location.href = "/login"; 
-  }, []);
 };

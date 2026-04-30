@@ -1,5 +1,7 @@
 import { CakeSlice, CupSoda, Flame, LayoutGrid, Soup } from "lucide-react";
 
+export const TAX_RATE = 0.1;
+
 export const CATEGORY_ICON_OPTIONS = [Flame, Soup, CupSoda, CakeSlice];
 
 export const ITEM_ACCENTS = [
@@ -33,6 +35,8 @@ export const NONE_DISCOUNT_OPTION = {
   name: "None",
   category: "",
 };
+
+export const DEFAULT_DISCOUNT_OPTIONS = [NONE_DISCOUNT_OPTION];
 
 export const ALL_CATEGORY_TAB = {
   id: "all",
