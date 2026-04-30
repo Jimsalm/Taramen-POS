@@ -21,7 +21,7 @@ import {
   useCreateMenuItem,
   useMenuItems,
   useToggleMenuItemAvailability,
-} from "@/hooks/usePosApi";
+} from "@/queries/menuQueries";
 import PosLayout from "@/layout/PosLayout";
 import { extractErrorMessage } from "@/shared/helpers/extractErrorMessage";
 import { getRequestFileUrl } from "@/shared/helpers/getRequestFileUrl";
@@ -253,13 +253,11 @@ export default function MenuItems() {
     const formData = new FormData();
     formData.append("name", trimmedName);
     formData.append("price", String(numericPrice));
-    formData.append("description", description.trim() || "");
-    formData.append("menu_id", String(normalizedCategoryId));
-    formData.append("type", menuType);
-    formData.append("item_type", menuType);
+    formData.append("category_id", String(normalizedCategoryId));
+    formData.append("available", "true");
+    formData.append("status", "true");
     if (pictureFile) {
       formData.append("image", pictureFile);
-      formData.append("picture", pictureFile);
     }
 
     try {
@@ -368,7 +366,7 @@ export default function MenuItems() {
             />
             <IButton
               type="submit"
-              variant="orange"
+              variant="taramenRed"
               showLoading={false}
               disabled={createMenuItem.isPending}
               className="h-10 w-full rounded-lg px-4 md:col-span-2 xl:col-span-3"
@@ -377,7 +375,7 @@ export default function MenuItems() {
               Add
             </IButton>
           </div>
-          <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_90px] md:items-center">
+          <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_5.625rem] md:items-center">
             <input
               ref={pictureInputRef}
               type="file"
@@ -533,7 +531,7 @@ export default function MenuItems() {
                               className="h-12 w-12 rounded-lg border border-gray-200 object-cover"
                             />
                           ) : (
-                            <div className="flex h-12 w-12 items-center justify-center rounded-lg border border-dashed border-gray-300 text-[10px] text-gray-400">
+                            <div className="flex h-12 w-12 items-center justify-center rounded-lg border border-dashed border-gray-300 text-[0.625rem] text-gray-400">
                               N/A
                             </div>
                           )}

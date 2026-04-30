@@ -1,3 +1,3 @@
-import apiClient from "@/shared/api/client";
+import apiClient from "@/api/client";
 
 export default apiClient;

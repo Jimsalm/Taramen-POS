@@ -1,4 +1,7 @@
+import { useCallback, useEffect, useMemo } from "react";
 import { Settings, Table2, Trash2, User } from "lucide-react";
+import { toast } from "sonner";
+import { useShallow } from "zustand/react/shallow";
 
 import IButton from "@/components/custom/Button";
 import Paragraph from "@/components/custom/Paragraph";
@@ -13,43 +16,147 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
+import {
+  DEFAULT_DISCOUNT_OPTIONS,
+  NONE_DISCOUNT_OPTION,
+  TAX_RATE,
+} from "@/pages/take-order/take-order-config";
+import {
+  buildOrderPayload,
+  calculateDiscountAmount,
+  formatCurrency,
+} from "@/pages/take-order/utils";
+import {
+  useCreateOrderMutation,
+  useDiscountGroupsQuery,
+  useEmployeeOptionsQuery,
+} from "@/queries/useTakeOrderQueries";
+import { extractErrorMessage } from "@/shared/helpers/extractErrorMessage";
+import useTakeOrderStore from "@/stores/useTakeOrderStore";
 
-export default function OrderSidebar({
-  orderId = "#ORD-0000",
-  dineType = "dine-in",
-  onDineTypeChange,
-  tableNumber = "",
-  onTableNumberChange,
-  employeeValue = "",
-  employeeOptions = [],
-  onEmployeeChange,
-  items = [],
-  onQtyChange,
-  discountValue = "none",
-  discountOptions = [],
-  onDiscountChange,
-  promoDiscountValue = "",
-  promoDiscountOptions = [],
-  onPromoDiscountChange,
-  subtotal = 0,
-  discountAmount = 0,
-  promoDiscountAmount = 0,
-  taxAmount = 0,
-  total = 0,
-  formatCurrency = (value) => `$${Number(value).toFixed(2)}`,
-  onSubmit,
-  onCustomizeItem,
-}) {
-  const hasItems = items.length > 0;
+const selectOrderSidebarState = (state) => ({
+  dineType: state.dineType,
+  discountValue: state.discountValue,
+  employeeId: state.employeeId,
+  orderItems: state.orderItems,
+  promoDiscountValue: state.promoDiscountValue,
+  tableNumber: state.tableNumber,
+});
+
+const selectOrderSidebarActions = (state) => ({
+  changeItemQty: state.changeItemQty,
+  openCustomizeModal: state.openCustomizeModal,
+  removeItem: state.removeItem,
+  setField: state.setField,
+});
+
+export default function OrderSidebar() {
+  const {
+    dineType,
+    discountValue,
+    employeeId,
+    orderItems,
+    promoDiscountValue,
+    tableNumber,
+  } = useTakeOrderStore(useShallow(selectOrderSidebarState));
+  const actions = useTakeOrderStore(useShallow(selectOrderSidebarActions));
+  const ensureEmployeeId = useTakeOrderStore((state) => state.ensureEmployeeId);
+  const clearSubmittedOrder = useTakeOrderStore((state) => state.clearSubmittedOrder);
+  const createOrder = useCreateOrderMutation();
+  const { data: employeeOptions = [] } = useEmployeeOptionsQuery();
+  const { data: discountGroups } = useDiscountGroupsQuery();
+  const regularDiscountOptions =
+    discountGroups?.regularDiscountOptions ?? DEFAULT_DISCOUNT_OPTIONS;
+  const promoDiscountOptions =
+    discountGroups?.promoDiscountOptions ?? DEFAULT_DISCOUNT_OPTIONS;
+
+  useEffect(() => {
+    const firstEmployeeId = employeeOptions[0]?.value;
+    if (firstEmployeeId) {
+      ensureEmployeeId(firstEmployeeId);
+    }
+  }, [employeeOptions, ensureEmployeeId]);
+
+  const totals = useMemo(() => {
+    const subtotal = orderItems.reduce((sum, item) => {
+      const addonsPrice = (item.addons ?? []).reduce(
+        (addonSum, addon) => addonSum + addon.price,
+        0,
+      );
+
+      return sum + (item.price + addonsPrice) * item.qty;
+    }, 0);
+    const regularDiscount =
+      regularDiscountOptions.find((option) => option.value === discountValue) ??
+      NONE_DISCOUNT_OPTION;
+    const promoDiscount =
+      promoDiscountOptions.find((option) => option.value === promoDiscountValue) ??
+      NONE_DISCOUNT_OPTION;
+    const discountAmount = calculateDiscountAmount(subtotal, regularDiscount);
+    const promoAmount = calculateDiscountAmount(subtotal, promoDiscount);
+    const taxableAmount = Math.max(subtotal - discountAmount - promoAmount, 0);
+    const taxAmount = taxableAmount * TAX_RATE;
+
+    return {
+      subtotal,
+      discountAmount,
+      promoAmount,
+      taxAmount,
+      total: taxableAmount + taxAmount,
+    };
+  }, [
+    discountValue,
+    orderItems,
+    promoDiscountOptions,
+    promoDiscountValue,
+    regularDiscountOptions,
+  ]);
+
+  const onSubmit = useCallback(async () => {
+    if (orderItems.length === 0) {
+      toast.error("Add at least one item before submitting the order.");
+      return;
+    }
+
+    const payload = buildOrderPayload({
+      dineType,
+      discountValue,
+      employeeId,
+      orderItems,
+      regularDiscountOptions,
+      tableNumber,
+      noneDiscountOption: NONE_DISCOUNT_OPTION,
+    });
+
+    try {
+      await createOrder.mutateAsync(payload);
+      clearSubmittedOrder();
+      toast.success("Order submitted.");
+    } catch (requestError) {
+      toast.error(extractErrorMessage(requestError, "Unable to submit order."));
+    }
+  }, [
+    clearSubmittedOrder,
+    createOrder,
+    dineType,
+    discountValue,
+    employeeId,
+    orderItems,
+    regularDiscountOptions,
+    tableNumber,
+  ]);
+
+  const orderId = "#ORD-9082";
+  const hasItems = orderItems.length > 0;
   const discountLabel =
-    discountOptions.find((option) => option.value === discountValue)?.label ??
+    regularDiscountOptions.find((option) => option.value === discountValue)?.label ??
     "Regulatory";
   const promoLabel =
     promoDiscountOptions.find((option) => option.value === promoDiscountValue)
       ?.label ?? "Promo";
 
   return (
-    <aside className="bg-transparent border border-transparent shadow-none p-0 sticky top-6 h-[calc(100vh-48px)] flex flex-col">
+    <aside className="bg-transparent border border-transparent shadow-none p-0 sticky top-6 h-[calc(100vh-3rem)] flex flex-col">
       <header className="flex items-center justify-between">
         <Title size="lg" className="text-gray-900">
           Current Order
@@ -59,21 +166,21 @@ export default function OrderSidebar({
 
       <div className="mt-5">
         <div className="grid grid-cols-2 rounded-full border border-gray-200 bg-gray-50 p-1">
-          <IButton
+            <IButton
             type="button"
-            variant={dineType === "dine-in" ? "orange" : "ghost"}
+            variant={dineType === "dine-in" ? "taramenRed" : "ghost"}
             showLoading={false}
             className="h-8 rounded-full text-xs font-semibold"
-            onClick={() => onDineTypeChange?.("dine-in")}
+            onClick={() => actions.setField("dineType", "dine-in")}
           >
             Dine In
           </IButton>
           <IButton
             type="button"
-            variant={dineType === "takeout" ? "orange" : "ghost"}
+            variant={dineType === "takeout" ? "taramenRed" : "ghost"}
             showLoading={false}
             className="h-8 rounded-full text-xs font-semibold"
-            onClick={() => onDineTypeChange?.("takeout")}
+            onClick={() => actions.setField("dineType", "takeout")}
           >
             Take Out
           </IButton>
@@ -89,7 +196,7 @@ export default function OrderSidebar({
             <Table2 className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-400" />
             <Input
               value={tableNumber}
-              onChange={(event) => onTableNumberChange?.(event.target.value)}
+              onChange={(event) => actions.setField("tableNumber", event.target.value)}
               className="h-10 pl-9 text-sm font-semibold"
               inputMode="numeric"
               disabled={dineType === "takeout"}
@@ -100,7 +207,10 @@ export default function OrderSidebar({
           <Paragraph size="xs" className="text-gray-500 font-semibold uppercase">
             Employee
           </Paragraph>
-          <Select value={employeeValue} onValueChange={onEmployeeChange}>
+          <Select
+            value={employeeId}
+            onValueChange={(value) => actions.setField("employeeId", value)}
+          >
             <SelectTrigger className="h-10 w-full text-sm font-semibold">
               <User className="size-4 text-gray-400" />
               <SelectValue placeholder="Select employee" />
@@ -120,7 +230,7 @@ export default function OrderSidebar({
         {hasItems ? (
           <div className="flex-1 overflow-y-auto pr-1">
             <ul className="space-y-4">
-              {items.map((item) => (
+              {orderItems.map((item) => (
                 <li key={item.id} className="rounded-2xl border border-gray-100 p-4">
                   <div className="flex items-start gap-3">
                     <div
@@ -172,7 +282,7 @@ export default function OrderSidebar({
                             variant="ghost"
                             showLoading={false}
                             className="h-8 w-8 rounded-none border-r border-gray-200 p-0 text-gray-600 hover:bg-transparent"
-                            onClick={() => onQtyChange?.(item.id, -1)}
+                            onClick={() => actions.changeItemQty(item.id, -1)}
                           >
                             -
                           </IButton>
@@ -184,7 +294,7 @@ export default function OrderSidebar({
                             variant="ghost"
                             showLoading={false}
                             className="h-8 w-8 rounded-none border-l border-gray-200 p-0 text-gray-600 hover:bg-transparent"
-                            onClick={() => onQtyChange?.(item.id, 1)}
+                            onClick={() => actions.changeItemQty(item.id, 1)}
                           >
                             +
                           </IButton>
@@ -195,7 +305,7 @@ export default function OrderSidebar({
                             variant="ghost"
                             showLoading={false}
                             className="h-8 w-8 rounded-lg p-0 text-gray-400 hover:text-gray-700"
-                            onClick={() => onCustomizeItem?.(item)}
+                            onClick={() => actions.openCustomizeModal(item.id)}
                             aria-label="Customize item"
                           >
                             <Settings className="size-4" />
@@ -205,7 +315,7 @@ export default function OrderSidebar({
                             variant="ghost"
                             showLoading={false}
                             className="h-8 w-8 rounded-lg p-0 text-gray-400 hover:text-orange"
-                            onClick={() => onQtyChange?.(item.id, -item.qty)}
+                            onClick={() => actions.removeItem(item.id)}
                             aria-label="Remove item"
                           >
                             <Trash2 className="size-4" />
@@ -240,12 +350,15 @@ export default function OrderSidebar({
                 <Paragraph size="xs" className="text-gray-500 font-semibold uppercase">
                   Regulatory Dsc.
                 </Paragraph>
-                <Select value={discountValue} onValueChange={onDiscountChange}>
+                <Select
+                  value={discountValue}
+                  onValueChange={(value) => actions.setField("discountValue", value)}
+                >
                   <SelectTrigger className="h-9 w-full text-xs font-semibold">
                     <SelectValue placeholder="Select" />
                   </SelectTrigger>
                   <SelectContent>
-                    {discountOptions.map((option) => (
+                    {regularDiscountOptions.map((option) => (
                       <SelectItem key={option.value} value={option.value}>
                         {option.label}
                       </SelectItem>
@@ -257,7 +370,10 @@ export default function OrderSidebar({
                 <Paragraph size="xs" className="text-gray-500 font-semibold uppercase">
                   Promo Dsc.
                 </Paragraph>
-                <Select value={promoDiscountValue} onValueChange={onPromoDiscountChange}>
+                <Select
+                  value={promoDiscountValue}
+                  onValueChange={(value) => actions.setField("promoDiscountValue", value)}
+                >
                   <SelectTrigger className="h-9 w-full text-xs font-semibold">
                     <SelectValue placeholder="Select" />
                   </SelectTrigger>
@@ -278,7 +394,7 @@ export default function OrderSidebar({
                   Subtotal
                 </Paragraph>
                 <Paragraph size="sm" className="text-gray-900 font-semibold">
-                  {formatCurrency(subtotal)}
+                  {formatCurrency(totals.subtotal)}
                 </Paragraph>
               </div>
               <div className="flex items-center justify-between text-orange">
@@ -286,7 +402,7 @@ export default function OrderSidebar({
                   {discountLabel}
                 </Paragraph>
                 <Paragraph size="xs" className="text-orange">
-                  - {formatCurrency(discountAmount)}
+                  - {formatCurrency(totals.discountAmount)}
                 </Paragraph>
               </div>
               <div className="flex items-center justify-between text-orange">
@@ -294,7 +410,7 @@ export default function OrderSidebar({
                   {promoLabel}
                 </Paragraph>
                 <Paragraph size="xs" className="text-orange">
-                  - {formatCurrency(promoDiscountAmount)}
+                  - {formatCurrency(totals.promoAmount)}
                 </Paragraph>
               </div>
               <div className="flex items-center justify-between">
@@ -302,7 +418,7 @@ export default function OrderSidebar({
                   Tax (10%)
                 </Paragraph>
                 <Paragraph size="sm" className="text-gray-900 font-semibold">
-                  {formatCurrency(taxAmount)}
+                  {formatCurrency(totals.taxAmount)}
                 </Paragraph>
               </div>
             </div>
@@ -313,13 +429,13 @@ export default function OrderSidebar({
               Total Amount
             </Paragraph>
             <Title size="2xl" className="text-gray-900">
-              {formatCurrency(total)}
+              {formatCurrency(totals.total)}
             </Title>
           </div>
 
           <IButton
             type="button"
-            variant="orange"
+            variant="taramenRed"
             className="mt-6 w-full rounded-2xl py-6 text-base font-semibold"
             showLoading={false}
             onClick={onSubmit}

@@ -5,7 +5,7 @@ import Paragraph from "@/components/custom/Paragraph";
 import Title from "@/components/custom/Title";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import PosNotificationBar from "@/components/custom/PosNotificationBar";
-import { useLogout } from "@/hooks/useAuth";
+import { useLogout } from "@/shared/hooks/useAuth";
 import { confirmAction } from "@/shared/helpers/confirmAction";
 
 const getInitials = (name = "") =>
@@ -38,7 +38,7 @@ export default function PosNavbar({
   const currentLabel = breadcrumbs.at(-1)?.label || "Dashboard";
 
   return (
-    <nav className="fixed inset-x-0 top-0 z-20 h-[72px] border-b border-gray-200 bg-white shadow-sm">
+    <nav className="fixed inset-x-0 top-0 z-20 h-[4.5rem] border-b border-gray-200 bg-white shadow-sm">
       <div className="flex h-full items-center gap-4 px-4 sm:px-5 lg:px-6">
         {showToggle ? (
           <IButton
@@ -77,7 +77,7 @@ export default function PosNavbar({
                 {getInitials(profileName)}
               </AvatarFallback>
             </Avatar>
-            <div className="hidden min-w-[140px] sm:block">
+            <div className="hidden min-w-[8.75rem] sm:block">
               <Title size="sm" className="truncate leading-tight text-gray-900">
                 {profileName}
               </Title>
