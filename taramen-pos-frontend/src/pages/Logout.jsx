@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import ICard from "../components/custom/Card";
 import LoginLayout from "../layout/LoginLayout";
-import { useLogout } from "../hooks/useAuth";
+import { useLogout } from "@/shared/hooks/useAuth";
 
 export default function Logout() {
   const logout = useLogout();
