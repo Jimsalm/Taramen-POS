@@ -238,7 +238,9 @@ class OrderService{
         $order = Order::findOrFail($id);
 
         if ($order->status === 'completed'){
-            throw new \Exception('Order cannot be deleted because it is completed');
+            throw ValidationException::withMessages([
+                'status' => ['Order cannot be deleted because it is completed.'],
+            ]);
         }
 
         $order->delete();
