@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 class OrderService{
-    
+
     public function getAllOrders(){
         return Order::with('orderItems', 'employee')->latest()->get();
     }
@@ -44,13 +44,35 @@ class OrderService{
 
         return $query->latest()->paginate($perPage);
     }
-        
+
 
     public function createOrder($request){
-        
+
         return DB::transaction(function () use ($request) {
             $validated_data = $request->validated();
-            
+            $notAvailable = [];
+
+            foreach ($validated_data['items'] as $index => $item) {
+                $menuItem = MenuItem::where('id' , $item['menu_item_id'])->first();
+                    if($menuItem->is_bundle == 1){
+                       $componentItems= $menuItem->bundleComponents()->where('available', 0)->pluck('name')->toArray();
+                       $notAvailable = array_merge($notAvailable, $componentItems);
+                    }else{
+                        if($menuItem->available == 0){
+                            $notAvailable[] = $menuItem->name;
+                        }
+                    }
+
+            }
+            if (count($notAvailable) > 0) {
+                throw ValidationException::withMessages([
+                    'items' => [
+                        'The following menu items are not available: ' . implode(', ', $notAvailable),
+                    ],
+                ]);
+
+            }
+
             $order = Order::create([
                 'order_number' => Order::generateOrderNumber(),
                 'employee_id' => $validated_data['employee_id'],
@@ -59,11 +81,17 @@ class OrderService{
                 'subtotal' => 0,
                 'total_discount' => 0,
                 'total_amount' => 0,
+                'special_request' => $validated_data['special_request'] ?? null,
             ]);
 
             foreach ($validated_data['items'] as $index => $item) {
-                $this->createOrderItem($order, $item, $index);
+                $menuItem = MenuItem::where('id' , $item['menu_item_id'])->first();
+                    if(count($notAvailable) == 0){
+                        $this->createOrderItem($order, $item, $index);
+                    }
             }
+
+
 
             $order->calculateTotalAmount();
             $order->save();
@@ -74,12 +102,12 @@ class OrderService{
 
     private function createOrderItem($order, $item, int $index = 0){
         $menuItem = MenuItem::findOrFail($item['menu_item_id']);
-        
+
         $discount = null;
         $discountName = null;
         $discountType = null;
         $discountAmount = 0;
-        
+
         if(isset($item['discount_id'])){
             $discount = Discount::with(['discountType', 'menuItems'])
                 ->find($item['discount_id']);
@@ -128,7 +156,7 @@ class OrderService{
         }
 
         $totalAmount = $subtotal - $discountAmount;
-        
+
         $orderItem = OrderItem::create([
             'order_id' => $order->id,
             'menu_item_id' => $menuItem->id,
@@ -170,7 +198,7 @@ class OrderService{
                     'unit_price' => $item->unit_price,
                     'quantity' => $item->quantity,
                     'subtotal' => $item->subtotal,
-                    'discount_id' => $item->discount_id,
+                    'discount_id' => $item->discount_id ?? null,
                     'discount_name' => $item->discount_name,
                     'discount_type' => $item->discount_type,
                     'discount_amount' => $item->discount_amount,
@@ -185,13 +213,20 @@ class OrderService{
         ];
     }
 
-    public function updateOrder($id, $request){
-        $order = Order::findOrFail($id);
-        $validated_data = $request->validated();
-
-        $order->update($validated_data);
-        return $order->fresh(['orderItems', 'employee']);
+   public function updateOrder($id, $request){
+    $order = Order::findOrFail($id);
+    $validated_data = $request->validated();
+    $order->update($validated_data);
+    $order->orderItems()->delete();
+    foreach($validated_data['items'] as $index => $item) {
+        $this->createOrderItem($order, $item, $index);
     }
+
+    $order->calculateTotalAmount();
+    $order->save();
+
+    return $order->fresh(['orderItems', 'employee']);
+}
 
     public function updateOrderStatus($id, $status){
         $order = Order::findOrFail($id);
@@ -201,7 +236,7 @@ class OrderService{
 
     public function deleteOrder($id){
         $order = Order::findOrFail($id);
-        
+
         if ($order->status === 'completed'){
             throw new \Exception('Order cannot be deleted because it is completed');
         }

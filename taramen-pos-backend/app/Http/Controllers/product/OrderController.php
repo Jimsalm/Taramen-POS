@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\product;
 
+use App\Exports\ReceiptExport;
 use App\Http\Controllers\Controller;
 use App\Services\OrderService;
 use Illuminate\Http\Request;
@@ -15,7 +16,7 @@ class OrderController extends Controller
     public function __construct(
         protected OrderService $orderService
     ) {}
-    
+
     public function index(OrderRequest $request)
     {
         $filter = $request->validated();
@@ -28,7 +29,7 @@ class OrderController extends Controller
             'Orders retrieved successfully'
         );
     }
-  
+
     public function store(OrderRequest $request)
     {
         try {
@@ -42,13 +43,13 @@ class OrderController extends Controller
         } catch (ValidationException $e) {
             throw $e;
         } catch (\Exception $e) {
-            return $this->internalErrorResponse('Failed to create order', $e, [
+            return $this->internalErrorResponse('Failed to create order: ' . $e->getMessage(), $e, [
                 'action' => 'orders.store',
             ]);
         }
     }
 
-    
+
     public function show($id)
     {
         try {
@@ -83,7 +84,8 @@ class OrderController extends Controller
             );
         }
     }
-    
+
+
     public function update(OrderRequest $request, $id)
     {
         try {
@@ -94,7 +96,7 @@ class OrderController extends Controller
                 'Order updated successfully'
             );
         } catch (\Exception $e) {
-            return $this->internalErrorResponse('Failed to update order', $e, [
+            return $this->internalErrorResponse('Failed to update order: '. $e->getMessage(), $e, [
                 'action' => 'orders.update',
                 'order_id' => $id,
             ]);
@@ -118,7 +120,7 @@ class OrderController extends Controller
         }
     }
 
-    
+
     public function destroy($id)
     {
         try {
@@ -155,5 +157,19 @@ class OrderController extends Controller
         ]));
 
         return ApiResponse::error($message, 500);
+    }
+
+    public function printReceipt() {
+        try{
+            $printReceipt = new ReceiptExport();
+            return $printReceipt->generate();
+        }catch (\Exception $e) {
+            return ApiResponse::error(
+                'Failed to print receipt',
+                500,
+                ['error' => $e->getMessage()]
+            );
+        }
+
     }
 }
