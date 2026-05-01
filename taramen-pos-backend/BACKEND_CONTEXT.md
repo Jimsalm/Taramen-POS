@@ -1,6 +1,6 @@
 # Backend Project Context
 
-Last scanned: 2026-04-27
+Last scanned: 2026-05-01
 
 This document summarizes the implemented backend for the Taramen POS project. Treat `pos_dev_guide.md` as planning/reference material only; the codebase has drifted from that guide in several places.
 
@@ -26,6 +26,7 @@ This document summarizes the implemented backend for the Taramen POS project. Tr
 ## Entrypoints
 
 - HTTP bootstrap: `bootstrap/app.php`
+- Central API exception renderer: `app/Exceptions/ApiExceptionRenderer.php`
 - API routing root: `routes/api.php`
 - Versioned route fragments: `routes/api/v1/*.php`
 - Web route: `GET /health`
@@ -74,9 +75,9 @@ Error:
 
 Notes:
 
-- `GET /api/v1/user` currently returns Laravel's raw authenticated user object, not an `ApiResponse` envelope.
-- API exceptions are forced to JSON in `bootstrap/app.php`.
-- Unauthenticated API access returns standardized `401 Unauthorized`.
+- API exception formatting is registered from `App\Exceptions\ApiExceptionRenderer`.
+- API errors are centralized for validation, unauthenticated, forbidden, not found, method not allowed, rate limit, HTTP, and unexpected server errors.
+- Unauthenticated API access returns standardized `401 Unauthorized`, including invalid bearer tokens from Postman without requiring an `Accept: application/json` header.
 - Authorization exceptions return standardized `403 Forbidden`.
 
 ## Auth
@@ -91,7 +92,7 @@ Notes:
   - Deletes the current access token
 - `GET /api/v1/user`
   - Requires `auth:sanctum`
-  - Returns the authenticated user directly
+  - Returns the authenticated user in the standard success envelope
 
 Seeded admin:
 
@@ -166,7 +167,8 @@ Orders:
 
 Reports:
 
-- `POST /report`
+- `GET /report`
+  - Optional query params: `start_date`, `end_date`
 
 Files:
 
@@ -196,7 +198,7 @@ Primary app migrations:
 
 - `files_uploads`: storage filename, original name, extension, file path, soft deletes
 - `categories`: unique name, description, status, optional `image_id`, soft deletes
-- `menu_items`: name, price, nullable `category_id`, status, available, optional `image_id`, `is_bundle`, soft deletes
+- `menu_items`: name, price, nullable `category_id`, available, optional `image_id`, `is_bundle`, soft deletes
 - `menu_item_components`: bundle menu item, component menu item, quantity, unique bundle/component pair
 - `discount_types`: name, soft deletes
 - `discounts`: name, `discount_type_id`, nullable value, active, soft deletes
@@ -216,7 +218,7 @@ Laravel defaults also provide users, password reset tokens, sessions, cache, job
 - `DiscountService`: CRUD and menu-item pivot attach/sync.
 - `DiscountTypeService`: CRUD for discount type names.
 - `OrderService`: filtered/paginated order listing, transactional order creation, receipt shaping, status updates, delete guard for completed orders, stats.
-- `ReportService`: intended to produce total sales, employee sales, and top item summaries.
+- `ReportService`: produces completed-order sales summaries, per-employee sales, and top-item summaries for an inclusive date range.
 
 ## Validation
 
@@ -224,7 +226,7 @@ Requests live in `app/Http/Requests`.
 
 - `AuthRequest`: `email`, `password`
 - `CategoryRequest`: name uniqueness on create/update, description/status, optional image
-- `MenuItemRequest`: name, price, category, status/available, optional image, bundle components
+- `MenuItemRequest`: name, price, category, available, optional image, bundle components
 - `EmployeeRequest`: name, active, optional profile image
 - `DiscountRequest`: name, `discount_type_id`, value, active, `menu_items_id` array
 - `DiscountTypeRequest`: unique required name
@@ -253,6 +255,12 @@ Requests live in `app/Http/Requests`.
 8. The response loads `orderItems` and `employee`.
 
 Order statuses are `pending`, `completed`, and `cancelled`. Completed orders cannot be deleted through `OrderService::deleteOrder`.
+
+Current order update behavior:
+
+- `PUT|PATCH /orders/{order}` updates validated fields directly.
+- `OrderService::updateOrder` deletes existing order items, rebuilds them from `items`, and recalculates totals.
+- Because `items` is optional in validation for updates, update requests without `items` are currently risky.
 
 ## Logging And Maintenance
 
@@ -312,15 +320,13 @@ Current frontend app routes are minimal: `/login` and `/dashboard`.
 
 - Test runner: `composer test` or `php artisan test`
 - Pest is configured for Feature tests, but `RefreshDatabase` is commented out.
-- Current test files are only Laravel skeleton examples.
+- Current test files are only Laravel skeleton examples unless local feature tests are added.
 
 ## Current Caveats And Drift Points
 
-- `ReportService` appears out of sync with the schema. It references invalid or missing fields/aliases such as `COUNT *`, `employee.id`, `order_items.name`, `orders_id`, and `is_free`.
-- Discount calculation in `OrderService` checks `$discount->type`, but the current `discounts` table/model use `discount_type_id` and a `discountType` relation. This likely needs alignment before discount calculations are reliable.
-- `DiscountTypeSeeder` is not idempotent and may create duplicate names on repeated seeding.
+- `OrderService::updateOrder` is broad: it deletes/rebuilds order items and expects `items` even though update validation marks `items` as optional.
 - `Discount` migration has `softDeletes`, but the model does not currently use `SoftDeletes`.
-- Migration rollbacks for `files_uploads` and `discount_types` drop `files` and `discount_type` respectively, not the tables created in `up`.
+- Migration rollback for `files_uploads` drops `files`, not the table created in `up`.
 - Docker installs PostgreSQL PHP extensions, while `.env.example` is configured for MySQL. MySQL deployments will need the relevant PDO extension.
 - `REST/*.http` samples include hardcoded bearer tokens and a few stale endpoints; use them as examples, not source of truth.
 - `tests/Feature/ExampleTest.php` requests `/`, but the implemented health route is `/health`.

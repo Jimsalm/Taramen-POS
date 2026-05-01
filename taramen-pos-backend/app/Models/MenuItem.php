@@ -16,14 +16,12 @@ class MenuItem extends Model
         'name',
         'price',
         'category_id',
-        'status',
         'available',
         'is_bundle',
         'image_id',
     ];
 
     protected $casts = [
-        'status' => 'boolean',
         'available' => 'boolean',
         'is_bundle' => 'boolean',
         'price' => 'decimal:2',
