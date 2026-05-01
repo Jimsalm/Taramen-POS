@@ -11,11 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('discount_types', function (Blueprint $table) {
-            $table->id();
-            $table->string("name")->unique();
-            $table->timestamps();
-            $table->softDeletes();
+        Schema::table('menu_items', function (Blueprint $table) {
+            $table->boolean('is_bundle')->default(false)->after('available');
         });
     }
 
@@ -24,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('discount_types');
+        Schema::table('menu_items', function (Blueprint $table) {
+            $table->dropColumn('is_bundle');
+        });
     }
 };

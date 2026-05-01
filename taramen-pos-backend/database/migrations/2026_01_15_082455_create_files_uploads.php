@@ -11,9 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('discount_types', function (Blueprint $table) {
+        Schema::create('files_uploads', function (Blueprint $table) {
             $table->id();
-            $table->string("name")->unique();
+            $table->string("storage_filename");
+            $table->string("original_name");
+            $table->string("extension");
+            $table->string("file_path");
             $table->timestamps();
             $table->softDeletes();
         });
@@ -24,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('discount_types');
+        Schema::dropIfExists('files');
     }
 };

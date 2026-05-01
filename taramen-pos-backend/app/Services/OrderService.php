@@ -7,6 +7,7 @@ use App\Models\OrderItem;
 use App\Models\MenuItem;
 use App\Models\Discount;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class OrderService{
     
@@ -60,8 +61,8 @@ class OrderService{
                 'total_amount' => 0,
             ]);
 
-            foreach ($validated_data['items'] as $item) {
-                $this->createOrderItem($order, $item);
+            foreach ($validated_data['items'] as $index => $item) {
+                $this->createOrderItem($order, $item, $index);
             }
 
             $order->calculateTotalAmount();
@@ -71,7 +72,7 @@ class OrderService{
         });
     }
 
-    private function createOrderItem($order, $item){
+    private function createOrderItem($order, $item, int $index = 0){
         $menuItem = MenuItem::findOrFail($item['menu_item_id']);
         
         $discount = null;
@@ -80,28 +81,47 @@ class OrderService{
         $discountAmount = 0;
         
         if(isset($item['discount_id'])){
-            $discount = Discount::where('id', $item['discount_id'])
-                ->where('active', true)
-                ->first();
+            $discount = Discount::with(['discountType', 'menuItems'])
+                ->find($item['discount_id']);
 
-            if ($discount && !$discount->menuItems->contains($menuItem->id)) {
-                $discount = null;
+            if (! $discount?->active) {
+                throw ValidationException::withMessages([
+                    "items.{$index}.discount_id" => [
+                        'The selected discount is inactive or unavailable.',
+                    ],
+                ]);
+            }
+
+            if ($discount && !$discount->menuItems->contains('id', $menuItem->id)) {
+                throw ValidationException::withMessages([
+                    "items.{$index}.discount_id" => [
+                        'This discount cannot be applied to the selected menu item.',
+                    ],
+                ]);
             }
 
             if ($discount) {
                 $discountName = $discount->name;
-                $discountType = $discount->type;
+                $discountType = $discount->discountType?->name;
+
+                if (!in_array($discountType, ['percentage', 'fixed', 'buy1take1'], true)) {
+                    throw ValidationException::withMessages([
+                        "items.{$index}.discount_id" => [
+                            'The selected discount type is not supported.',
+                        ],
+                    ]);
+                }
             }
         }
 
         $subtotal = $menuItem->price * $item['quantity'];
 
         if ($discount) {
-            if ($discount->type === 'percentage') {
+            if ($discountType === 'percentage') {
                 $discountAmount = ($subtotal * $discount->value) / 100;
-            } elseif ($discount->type === 'fixed') {
+            } elseif ($discountType === 'fixed') {
                 $discountAmount = min($subtotal, $discount->value);
-            } elseif ($discount->type === 'buy1take1') {
+            } elseif ($discountType === 'buy1take1') {
                 $freeQuantity = floor($item['quantity'] / 2);
                 $discountAmount = $freeQuantity * $menuItem->price;
             }
