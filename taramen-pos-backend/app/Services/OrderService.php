@@ -70,7 +70,7 @@ class OrderService{
                         'The following menu items are not available: ' . implode(', ', $notAvailable),
                     ],
                 ]);
-                return;
+
             }
 
             $order = Order::create([
@@ -81,6 +81,7 @@ class OrderService{
                 'subtotal' => 0,
                 'total_discount' => 0,
                 'total_amount' => 0,
+                'special_request' => $validated_data['special_request'] ?? null,
             ]);
 
             foreach ($validated_data['items'] as $index => $item) {
