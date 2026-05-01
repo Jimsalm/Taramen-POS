@@ -22,7 +22,16 @@ class ReceiptExport
         $img = "data:{$mime};base64,{$encodedImage}";
 
         $payload = [
-            "img" => $img
+            "img" => $img,
+            "totalCash" => 2000,
+            "date" => now()->format("m/d/Y H:i a"),
+            "transactionId" => "123456789",
+            "price" => 299, //array ito
+            "subtotal" => 299, // array rin
+            "quantity" => 1,
+            "change" => 1401,
+            "total" => 599,
+
         ];
 
         $calculatedHeight = $baseHeight + ($items * $rowheight);
