@@ -35,7 +35,6 @@ class MenuItemService {
             unset($data['components']);
 
             $data['is_bundle'] = (bool) ($data['is_bundle'] ?? false);
-            $data = $this->normalizeStatusFields($data);
 
             if ($image){
                 $file_uploaded = FileUploadHelper::upload($image, 'menu_items');
@@ -68,7 +67,6 @@ class MenuItemService {
             $hasComponents = array_key_exists('components', $data);
             $components = $data['components'] ?? [];
             unset($data['components']);
-            $data = $this->normalizeStatusFields($data);
 
             if ($image){
                 if ($menuItem->fileUpload?->file_path) {
@@ -107,7 +105,6 @@ class MenuItemService {
         $menuItem->delete();
 
         $menuItem->update([
-            'status' => false,
             'available' => false
         ]);
     }
@@ -118,7 +115,6 @@ class MenuItemService {
         $menuItem->restore();
 
         $menuItem->update([
-            'status' => true,
             'available' => true
         ]);
     }
@@ -126,7 +122,6 @@ class MenuItemService {
     public function toggleAvailability($id){
         $menuItem = MenuItem::withTrashed()->findOrFail($id);
         $menuItem->available = !$menuItem->available;
-        $menuItem->status = $menuItem->available;
         $menuItem->save();
 
         return $menuItem;
@@ -167,16 +162,6 @@ class MenuItemService {
         }
 
         $bundleMenuItem->bundleComponents()->sync($syncPayload);
-    }
-    private function normalizeStatusFields(array $data): array
-    {
-        if (array_key_exists('status', $data)) {
-            $data['available'] = (bool) $data['status'];
-        } elseif (array_key_exists('available', $data)) {
-            $data['status'] = (bool) $data['available'];
-        }
-
-        return $data;
     }
 
     private function attachTemporaryImageUrl(MenuItem $menuItem, int $expiresInMinutes = 15): MenuItem

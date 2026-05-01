@@ -196,7 +196,7 @@ Primary app migrations:
 
 - `files_uploads`: storage filename, original name, extension, file path, soft deletes
 - `categories`: unique name, description, status, optional `image_id`, soft deletes
-- `menu_items`: name, price, nullable `category_id`, status, available, optional `image_id`, `is_bundle`, soft deletes
+- `menu_items`: name, price, nullable `category_id`, available, optional `image_id`, `is_bundle`, soft deletes
 - `menu_item_components`: bundle menu item, component menu item, quantity, unique bundle/component pair
 - `discount_types`: name, soft deletes
 - `discounts`: name, `discount_type_id`, nullable value, active, soft deletes
@@ -224,7 +224,7 @@ Requests live in `app/Http/Requests`.
 
 - `AuthRequest`: `email`, `password`
 - `CategoryRequest`: name uniqueness on create/update, description/status, optional image
-- `MenuItemRequest`: name, price, category, status/available, optional image, bundle components
+- `MenuItemRequest`: name, price, category, available, optional image, bundle components
 - `EmployeeRequest`: name, active, optional profile image
 - `DiscountRequest`: name, `discount_type_id`, value, active, `menu_items_id` array
 - `DiscountTypeRequest`: unique required name
