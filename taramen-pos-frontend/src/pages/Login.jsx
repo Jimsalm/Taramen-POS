@@ -1,74 +1,99 @@
-import { useState } from "react";
+import { User, Loader2, Lock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { toast } from "sonner";
-import IAlert from "../components/custom/Alert";
 import IButton from "../components/custom/Button";
 import ICard from "../components/custom/Card";
 import Form from "../components/custom/Form";
 import IInput from "../components/custom/Input";
+import Paragraph from "../components/custom/Paragraph";
+import Title from "../components/custom/Title";
 import LoginLayout from "../layout/LoginLayout";
 import { loginSchema } from "../shared/lib/zod/schema/login";
-import { LockIcon, MailIcon, UtensilsCrossed } from "lucide-react"; 
+import { useLoginMutation } from "@/queries/authQueries";
+import useAuthStore from "../stores/useAuthStore";
+import IAlert from "../components/custom/Alert";
 
 export default function Login() {
-   const [error, setError] = useState(null);
    const navigate = useNavigate();
+   const { 
+      isLoading,
+      errorMessage,
+      clearError
+   } = useAuthStore();
+
+   const { mutate: login } = useLoginMutation();
 
    const onSubmit = async (data) => {
-      setError(null);
-      const id = toast.loading("Signing you in...");
-
-      try {
-         await new Promise(resolve => setTimeout(resolve, 1000));
-         
-         if (!data.username || !data.password) {
-            throw new Error("Please fill in all fields");
+      clearError();
+      login(data, {
+         onSuccess: () => {
+            navigate("/dashboard", { replace: true });
          }
-         
-         const mockToken = "mock-jwt-token";
-         localStorage.setItem("token", mockToken);
-         
-         toast.dismiss(id);
-         toast.success("Login successful!");
-         navigate("/dashboard", { replace: true });
-      } catch (error) {
-         toast.dismiss(id);
-         setError(error.message);
-      }
+      });
    };
 
    return (
       <LoginLayout>
-         <section className='flex flex-col lg:flex-row items-start mx-auto lg:gap-12 lg:pr-24 mb-12 lg:mb-0'>
+         <main className="w-full max-w-lg mx-auto flex items-center justify-center min-h-screen p-6">
             <ICard
                logo={
-                  <img 
-                     src="/TARAMEN.jpg" 
-                     alt="Ta'ramen POS"
-                     className="size-50 w-auto mx-auto block"
-                  />
+                  <div className="mb-4 mt-8">  
+                     <img 
+                        src="/taramen.svg" 
+                        alt="Ta'ramen POS"
+                        className="h-32 w-auto mx-auto block"
+                     />        
+                  </div>
                }
-               title='Welcome Back!'
-               description='Enter your credentials to access your account'
-               cardClassName='text-center w-100 bg-white shadow-xl'
-               cardTitleClassName='lg:text-3xl'
+               title="Welcome Back"
+               description="Please enter your details"
+               descriptionClassName="text-gray-400 text-lg font-normal"
+               cardClassName="text-center w-full bg-white border border-white/60 shadow-2xl rounded-2xl"
+               cardContentClassName="pb-8 px-10 pt-12"
+               cardTitleClassName="text-xl text-gray-800 font-bold"
+               cardHeaderClassName="gap-1"
             >
-               <Form className='flex flex-col gap-6' size- onSubmit={onSubmit} schema={loginSchema}>
-                  <IInput name='username' placeholder='Username' prefix={<MailIcon className='size-4 text-black' />} />
-                  <IInput
-                     name='password'
-                     type='password'
-                     placeholder='Password'
-                     prefix={<LockIcon className='size-4 text-black' />}
-                  />
-                  <IButton type='submit' variant='brandRed' className='w-full'>
-                     Sign In
-                  </IButton>
-
-                  {error && <IAlert description={error} />}
+               <Form className="flex flex-col" onSubmit={onSubmit} schema={loginSchema}>
+                  <div className="flex flex-col gap-6">
+                     <IInput 
+                        name="email" 
+                        type="email"
+                        placeholder="Enter username..." 
+                        className="bg-white border border-black h-12 !text-lg !pl-12 rounded-lg shadow-sm placeholder:text-gray-400"
+                        wrapperClassName="gap-2"
+                        prefix={<User className="size-6 text-gray-600" />}
+                     />
+                     <IInput
+                        name="password"
+                        type="password"
+                        placeholder="Enter password..."
+                        className="bg-white border border-black h-12 !text-lg !pl-12 rounded-lg shadow-sm placeholder:text-gray-400"
+                        prefix={<Lock className="size-6 text-gray-600" />}
+                     />
+                  </div>
+                  <div className="mt-12">
+                     <IButton 
+                        type="submit" 
+                        variant="taramenRed" 
+                        className="w-full h-12 text-base !font-normal tracking-wide flex items-center justify-center gap-2 rounded-lg" 
+                        disabled={isLoading}
+                     >
+                        {isLoading ? (
+                           <>
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                              SIGNING IN...
+                           </>
+                        ) : "Continue"}
+                     </IButton>
+                  </div>
+                  {errorMessage && (
+                     <div className="pt-2">
+                        <IAlert variant="destructive" description={errorMessage} />
+                     </div>
+                  )}
                </Form>
             </ICard>
-         </section>
+         </main>
+
       </LoginLayout>
    );
 }

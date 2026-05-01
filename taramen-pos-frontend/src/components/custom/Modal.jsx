@@ -9,7 +9,7 @@ import {
    AlertDialogHeader,
    AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { cn } from "@/shared/lib/utils";
+import { cn } from "@/lib/utils";
 import Suspense from "./Suspense";
 import ModalSkeleton from "./ModalSkeleton";
 

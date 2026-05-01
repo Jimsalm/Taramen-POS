@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Http\Controllers\Auth;
+namespace App\Http\Controllers\auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AuthRequest;
+use App\Http\Responses\ApiResponse;
 use Illuminate\Http\Request;
 use App\Services\AuthService;
 
@@ -18,13 +19,26 @@ class AuthController extends Controller
         
         $data = $this->authService->login($request->validated());
 
-        return response($data, 201);
+        return ApiResponse::success(
+            $data,
+            'Login successful',
+            201
+        );
     }
 
     public function logout(Request $request){
         $this->authService->logout($request->user());
-        return response([
-            'message' => 'Logged out'
-        ]);
+
+        return ApiResponse::success(
+            ['logged_out' => true],
+            'Logged out'
+        );
+    }
+
+    public function user(Request $request){
+        return ApiResponse::success(
+            $request->user(),
+            'Authenticated user retrieved successfully'
+        );
     }
 }

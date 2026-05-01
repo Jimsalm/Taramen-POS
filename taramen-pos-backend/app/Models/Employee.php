@@ -11,7 +11,8 @@ class Employee extends Model
     
     protected $fillable = [
         'name',
-        'active'
+        'profile',
+        'active',
     ];
     
     protected $casts = [

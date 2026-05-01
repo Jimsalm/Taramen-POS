@@ -15,6 +15,8 @@ return new class extends Migration
             $table->id();
             $table->string('name')->unique();
             $table->text('description')->nullable();
+            $table->boolean('status')->default(true);
+            $table->foreignId('image_id')->nullable()->constrained('files_uploads');
             $table->timestamps();
             $table->softDeletes();
         });

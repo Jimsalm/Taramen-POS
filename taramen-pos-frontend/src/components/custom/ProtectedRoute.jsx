@@ -1,17 +1,16 @@
-import getToken from "../../shared/helpers/getToken";
-import { Navigate } from "react-router-dom";
+import { Navigate } from 'react-router-dom';
+import { LOGIN } from '@/shared/constants/routes';
 
-export default function ProtectedRoute({ element }) {
-	const token = getToken();
+const ProtectedRoute = ({ element }) => {
+  const token = localStorage.getItem('auth_token');
 
-	if (!token) {
-		return (
-			<Navigate
-				to='/login'
-				replace
-			/>
-		);
-	}
+  // If there's no token, redirect to login
+  if (!token) {
+    return <Navigate to={LOGIN.path} replace />;
+  }
 
-	return element;
-}
+  // Otherwise, render the dashboard/protected content
+  return element;
+};
+
+export default ProtectedRoute;

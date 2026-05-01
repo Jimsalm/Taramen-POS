@@ -1,7 +1,6 @@
 <?php
 
-use App\Http\Controllers\Auth\AuthController;
-use App\Http\Product\Controllers\DiscountController;
+use App\Http\Controllers\product\DiscountController;
 use Illuminate\Support\Facades\Route;
 
 // Public Routes

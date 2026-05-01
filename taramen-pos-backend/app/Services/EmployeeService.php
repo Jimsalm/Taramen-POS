@@ -3,7 +3,8 @@
 namespace App\Services;
 
 use App\Models\Employee;
-use Exception;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
 
 class EmployeeService
 {
@@ -16,7 +17,10 @@ class EmployeeService
     }
 
     public function createEmployee(array $data){
-        $data['active'] = true;
+        if (!array_key_exists('active', $data)) {
+            $data['active'] = true;
+        }
+
         return Employee::create($data);
     }
 
@@ -26,6 +30,23 @@ class EmployeeService
 
     public function updateEmployee(Employee $employee, array $data){
         $employee->update($data);
+        return $employee;
+    }
+
+    public function updateEmployeeProfile(Employee $employee, ?UploadedFile $profile = null): Employee
+    {
+        if (!$profile) {
+            return $employee;
+        }
+
+        if ($employee->profile) {
+            Storage::disk('public')->delete($employee->profile);
+        }
+
+        $employee->update([
+            'profile' => $profile->store('employees', 'public'),
+        ]);
+
         return $employee;
     }
 

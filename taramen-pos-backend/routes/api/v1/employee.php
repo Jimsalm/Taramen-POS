@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\Product\EmployeeController;
+use App\Http\Controllers\product\EmployeeController;
 
 Route::middleware(['auth:sanctum'])->group(function (){
 

@@ -17,11 +17,13 @@ class MenuItem extends Model
         'price',
         'category_id',
         'available',
-        'image',
+        'is_bundle',
+        'image_id',
     ];
 
     protected $casts = [
         'available' => 'boolean',
+        'is_bundle' => 'boolean',
         'price' => 'decimal:2',
     ];
 
@@ -33,5 +35,29 @@ class MenuItem extends Model
     public function discount(): BelongsToMany
     {
         return $this->belongsToMany(Discount::class, 'discount_items');
+    }
+
+    public function fileUpload() {
+        return $this->belongsTo(FilesUpload::class, "image_id", "id");
+    }
+
+    public function bundleComponents(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            MenuItem::class,
+            'menu_item_components',
+            'bundle_menu_item_id',
+            'component_menu_item_id'
+        )->withPivot('quantity')->withTimestamps();
+    }
+
+    public function usedInBundles(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            MenuItem::class,
+            'menu_item_components',
+            'component_menu_item_id',
+            'bundle_menu_item_id'
+        )->withPivot('quantity')->withTimestamps();
     }
 }

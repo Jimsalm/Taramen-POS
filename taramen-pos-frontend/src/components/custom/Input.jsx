@@ -4,10 +4,9 @@ import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { useState } from "react";
 import { EyeClosedIcon, EyeIcon } from "lucide-react";
-import { useSelector } from "react-redux";
 import { nestedObjParser } from "../../shared/helpers/parser";
 import { ALPHABETS_ONLY, ALPHANUMERIC_ONLY, NUMERIC_ONLY } from "../../shared/constants/regex";
-import { cn } from "../../shared/lib/utils";
+import { cn } from "../../lib/utils";
 
 export default function IInput({
    name,
@@ -36,7 +35,7 @@ export default function IInput({
    const fieldErrorObj = nestedObjParser(errors, name);
    const error = fieldErrorObj?.message;
    const isPassword = props.type === "password";
-   const isLoading = useSelector((state) => state.loading.isLoading);
+   const isLoading = props.isLoading || false;
    const [passwordVisible, setPasswordVisible] = useState(false);
 
    const preventSubmit = (e) => {
@@ -117,20 +116,20 @@ export default function IInput({
                   <EyeClosedIcon
                      className={`${
                         isLoading ? "pointer-events-none" : ""
-                     } absolute top-1/2 right-3 -translate-y-1/2 cursor-pointer size-4.5 select-none text-gray-500`}
+                     } absolute top-1/2 right-3 -translate-y-1/2 cursor-pointer size-6 select-none text-gray-600`}
                      onClick={() => setPasswordVisible(!passwordVisible)}
                   />
                ) : (
                   <EyeIcon
                      className={`${
                         isLoading ? "pointer-events-none" : ""
-                     } absolute top-1/2 right-3 -translate-y-1/2 cursor-pointer size-4.5 select-none text-gray-500`}
+                     } absolute top-1/2 right-3 -translate-y-1/2 cursor-pointer size-6 select-none text-gray-600`}
                      onClick={() => setPasswordVisible(!passwordVisible)}
                   />
                ))}
          </div>
 
-         {showError && error && <p className='text-xs font-medium text-red-500 text-start'>{error}</p>}
+         {showError && error && <p className='text-md font-medium text-red-500 text-start'>{error}</p>}
       </div>
    );
 }

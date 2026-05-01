@@ -1,7 +1,7 @@
 import { z } from "zod";
-import { stringRequired } from "../helpers.js";
+import { emailRequired, stringRequired } from "../helpers.js";
 
 export const loginSchema = z.object({
-   username: stringRequired(),
-   password: stringRequired(),
+   email: emailRequired(),
+   password: stringRequired("Password"),
 });

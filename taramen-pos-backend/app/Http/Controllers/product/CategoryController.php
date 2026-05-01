@@ -1,10 +1,15 @@
 <?php
 
-namespace App\Http\Controllers\Product;
+namespace App\Http\Controllers\product;
 
-use App\Http\Controllers\Controller;
-use App\Models\Category;
+use App\Helper\AttachUrl;
+use App\Helper\FileUploadHelper;
 use App\Http\Requests\CategoryRequest;
+use App\Http\Responses\ApiResponse;
+use App\Models\Category;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\URL;
+use App\Http\Controllers\Controller;
 
 class CategoryController extends Controller
 {
@@ -12,8 +17,15 @@ class CategoryController extends Controller
      * Display a listing of the resource.
      */
     public function index()
-    {
-        return response()->json(Category::all());
+    {     
+        $categories  = Category::all();
+         $new_categ = $categories->map(function ($category) {
+            return AttachUrl::attachUrl($category);
+        });
+        return ApiResponse::success(
+            $new_categ,
+            'Categories retrieved successfully'
+        );
     }
 
     /**
@@ -21,11 +33,20 @@ class CategoryController extends Controller
      */
     public function store(CategoryRequest $request)
     {
-        $category = Category::create($request->validated());
-        return response()->json([
-            'message' => 'Category created successfully',
-            'category' => $category
-        ], 201);
+        $data = $request->validated();
+
+        if ($request->hasFile('image')) {
+            $file_uploaded = FileUploadHelper::upload($request->file('image'), 'categories');
+            $data['image_id'] = $file_uploaded->id;
+        }
+
+        $category = Category::create($data);
+
+        return ApiResponse::success(
+            $category,
+            'Category created successfully',
+            201
+        );
     }
 
     /**
@@ -34,10 +55,10 @@ class CategoryController extends Controller
     public function show(string $id)
     {
         $category = Category::findOrFail($id);
-        return response()->json([
-            'message' => 'Category retrieved successfully',
-            'category' => $category
-        ], 200);
+        return ApiResponse::success(
+            $category,
+            'Category retrieved successfully'
+        );
     }
 
     /**
@@ -46,13 +67,23 @@ class CategoryController extends Controller
     public function update(CategoryRequest $request, string $id)
     {
         $category = Category::findOrFail($id);
+        $data = $request->validated();
 
-        $category->update($request->validated());
+        if ($request->hasFile('image')) {
+            if ($category->image_id) {
+                Storage::disk('public')->delete($category->fileUpload?->file_path);
+            }
+            $file_uploaded = FileUploadHelper::upload($request->file('image'), 'categories');
+            $data['image_id'] = $file_uploaded->id;
+            
+        }
+
+        $category->update($data);
         
-        return response()->json([
-            'message' => 'Category updated successfully',
-            'category' => $category
-        ], 200);
+        return ApiResponse::success(
+            $category,
+            'Category updated successfully'
+        );
     }
 
     /**
@@ -64,9 +95,12 @@ class CategoryController extends Controller
 
         $category->delete();
 
-        return response()->json([
-            'message' => 'Category deleted successfully',
-            'category' => $category
-        ], 200);
+        return ApiResponse::success(
+            $category,
+            'Category deleted successfully'
+        );
     }
+
+
+  
 }

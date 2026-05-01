@@ -1,9 +1,12 @@
 <?php
 
+use App\Exceptions\ApiExceptionRenderer;
+use App\Http\Middleware\LogEndpointAccess;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
-use App\Http\Middleware\LogEndpointAccess;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -14,7 +17,8 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->append(LogEndpointAccess::class);
+        $middleware->redirectGuestsTo(fn (Request $request) => $request->is('api/*') || ! Route::has('login') ? null : route('login'));
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        ApiExceptionRenderer::register($exceptions);
     })->create();
