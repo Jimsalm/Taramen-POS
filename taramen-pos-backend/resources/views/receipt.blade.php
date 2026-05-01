@@ -18,6 +18,12 @@
             text-align: right;
             white-space: nowrap;
         }
+        body{
+            margin : 0;
+        }
+        table {
+            margin: 0 auto;
+        }
 
     </style>
 
@@ -26,7 +32,13 @@
 
 <body style="margin:0; ">
     <table>
-        <tr><td style="text-align: center; font-weight: bold">Ta'ramen</td></tr>
+        <tr>
+            <td style="text-align: center;"> <img src="{{ $img }}" alt="Logo" style="width: 100px; "></td>
+        </tr>
+
+    </table>
+    <table>
+        <tr><td style="text-align: center; font-weight: bold; font-size: 20px">Ta'ramen</td></tr>
         <tr><td>Order: R4</td></tr>
         <tr><td>Employee: Diane</td></tr>
         <tr><td>POS: POS3</td></tr>
@@ -40,16 +52,10 @@
             <td>Miso Ramen</td>
             <td class="value">P299</td>
         </tr>
-        <tr><td colspan="2">1x P299</td></tr>
+        <tr><td colspan="2">1 x P299</td></tr>
     </table>
 
-    <table style="margin-top: 10px; margin-bottom: 10px; ">
-        <tr >
-            <td style="">Miso Ramen Gyudon</td>
-            <td class="value" style="">P299</td>
-        </tr>
-        <tr><td colspan="2">1x P299</td></tr>
-    </table>
+
 
     <table>
         <tr ><td colspan="2" style="border-bottom: 1px dashed black"></td></tr>
@@ -75,6 +81,7 @@
     <table>
         <tr><td colspan="2" style="border-bottom: 1px dashed black"></td></tr>
     </table>
+
 
 
 
