@@ -13,7 +13,7 @@ class Order extends Model
         'status',
         'subtotal',
         'total_discount',
-        "special_request",
+        'special_request',
         'total_amount',
     ];
 
