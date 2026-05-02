@@ -6,7 +6,7 @@ import Logout from "./pages/Logout";
 import Dashboard from "./pages/Dashboard";
 import MenuCategories from "./pages/menu/MenuCategories";
 import MenuItems from "./pages/menu/MenuItems";
-import Staff from "./pages/Staff";
+import Staff from "./pages/staff/Staff";
 import TakeOrder from "./pages/take-order/TakeOrder";
 import {
    DASHBOARD,
